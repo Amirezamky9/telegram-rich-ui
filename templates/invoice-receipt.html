@@ -1,0 +1,152 @@
+<!--
+  TEMPLATE: Invoice Receipt
+  DESCRIPTION: Production-ready financial receipt featuring compact striped tabular layout,
+               colspan totals aggregation, localized Telegram timestamp, custom emoji badges,
+               clipboard tracking copy button, and payment call-to-action.
+
+  PLACEHOLDER SUBSTITUTION MATRIX:
+  - {{INVOICE_NUMBER}}: Unique invoice reference string (e.g., "INV-2026-9810")
+  - {{ISSUE_DATE_UNIX}}: Unix timestamp in seconds for client-localized display (e.g., "1758012000")
+  - {{CUSTOMER_NAME}}: Customer billing name (e.g., "Amir Reza")
+  - {{CUSTOMER_EMAIL}}: Customer email contact (e.g., "billing@example.com")
+  - {{EMOJI_CHECK_ID}}: Custom emoji ID for paid/status marker (e.g., "5368324170671202286")
+  - {{ITEM_1_DESC}}: Description of first service/line item (e.g., "Cloud Server 4 vCPU")
+  - {{ITEM_1_QTY}}: Quantity of first item (e.g., "1")
+  - {{ITEM_1_AMOUNT}}: Extended price of first item (e.g., "$45.00")
+  - {{ITEM_2_DESC}}: Description of second service/line item (e.g., "Managed Postgres Cluster")
+  - {{ITEM_2_QTY}}: Quantity of second item (e.g., "1")
+  - {{ITEM_2_AMOUNT}}: Extended price of second item (e.g., "$35.00")
+  - {{SUBTOTAL_AMOUNT}}: Subtotal price sum (e.g., "$80.00")
+  - {{DISCOUNT_AMOUNT}}: Promotional credit or coupon reduction (e.g., "-$10.00")
+  - {{TAX_AMOUNT}}: Value added or sales tax (e.g., "$7.00")
+  - {{TOTAL_AMOUNT}}: Final payable total balance (e.g., "$77.00")
+  - {{TRACKING_CODE}}: Clipboard-ready payment reference token (e.g., "TRK-9810-PAY")
+  - {{PAYMENT_URL}}: Direct HTTPS payment gateway URL (e.g., "https://pay.example.com/inv/9810")
+-->
+
+<h3><tg-emoji emoji-id="{{EMOJI_CHECK_ID}}">🧾</tg-emoji> Official Receipt #{{INVOICE_NUMBER}}</h3>
+
+<p>
+  <b>Billed To:</b> {{CUSTOMER_NAME}} (<code>{{CUSTOMER_EMAIL}}</code>)<br/>
+  <b>Issued:</b> <tg-time unix="{{ISSUE_DATE_UNIX}}" format="wDT">Date</tg-time><br/>
+  <b>Status:</b> <b>Unpaid · Awaiting Settlement</b>
+</p>
+
+<table bordered striped compact>
+  <caption>Invoice Breakdown</caption>
+  <tr>
+    <th align="left">Description</th>
+    <th align="center">Qty</th>
+    <th align="right">Amount</th>
+  </tr>
+  <tr>
+    <td align="left">{{ITEM_1_DESC}}</td>
+    <td align="center">{{ITEM_1_QTY}}</td>
+    <td align="right">{{ITEM_1_AMOUNT}}</td>
+  </tr>
+  <tr>
+    <td align="left">{{ITEM_2_DESC}}</td>
+    <td align="center">{{ITEM_2_QTY}}</td>
+    <td align="right">{{ITEM_2_AMOUNT}}</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="left">Subtotal</td>
+    <td align="right">{{SUBTOTAL_AMOUNT}}</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="left"><i>Discount Voucher</i></td>
+    <td align="right"><i>{{DISCOUNT_AMOUNT}}</i></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="left">VAT / Sales Tax (10%)</td>
+    <td align="right">{{TAX_AMOUNT}}</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="left"><b>Total Due</b></td>
+    <td align="right"><b>{{TOTAL_AMOUNT}}</b></td>
+  </tr>
+</table>
+
+<p>
+  Payment Reference: <code>{{TRACKING_CODE}}</code>
+  <tg-button type="copy_text" text="{{TRACKING_CODE}}">Copy Code</tg-button>
+</p>
+
+<tg-button-row align="center">
+  <tg-button type="url" style="success" url="{{PAYMENT_URL}}">Pay Invoice ({{TOTAL_AMOUNT}}) ↗</tg-button>
+  <tg-button type="callback_data" style="primary" data="invoice:pdf:{{INVOICE_NUMBER}}">Download PDF</tg-button>
+  <tg-button type="callback_data" style="link" data="invoice:support:{{INVOICE_NUMBER}}">Billing Query</tg-button>
+</tg-button-row>
+
+<!--
+  ========================================================================
+  PERSIAN / RTL LOCALIZED VARIANT (جهت استفاده در زبان فارسی):
+  To render in Persian, set `is_rtl: true` in the `rich_message` payload,
+  and swap the English table rows and button labels with the following block:
+  ========================================================================
+
+  <h3><tg-emoji emoji-id="{{EMOJI_CHECK_ID}}">🧾</tg-emoji> صورت‌حساب شماره {{INVOICE_NUMBER}}</h3>
+
+  <p>
+    <b>صورت‌حساب به نام:</b> {{CUSTOMER_NAME}} (<code>{{CUSTOMER_EMAIL}}</code>)<br/>
+    <b>تاریخ صدور:</b> <tg-time unix="{{ISSUE_DATE_UNIX}}" format="wDT">تاریخ</tg-time><br/>
+    <b>وضعیت:</b> <b>پرداخت نشده · در انتظار تسویه</b>
+  </p>
+
+  <table bordered striped compact>
+    <caption>ریز اقلام فاکتور</caption>
+    <tr>
+      <th align="right">شرح کالا / خدمات</th>
+      <th align="center">تعداد</th>
+      <th align="left">مبلغ</th>
+    </tr>
+    <tr>
+      <td align="right">{{ITEM_1_DESC}}</td>
+      <td align="center">{{ITEM_1_QTY}}</td>
+      <td align="left">{{ITEM_1_AMOUNT}}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ITEM_2_DESC}}</td>
+      <td align="center">{{ITEM_2_QTY}}</td>
+      <td align="left">{{ITEM_2_AMOUNT}}</td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right">جمع جزء</td>
+      <td align="left">{{SUBTOTAL_AMOUNT}}</td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right"><i>تخفیف</i></td>
+      <td align="left"><i>{{DISCOUNT_AMOUNT}}</i></td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right">مالیات بر ارزش افزوده</td>
+      <td align="left">{{TAX_AMOUNT}}</td>
+    </tr>
+    <tr>
+      <td colspan="2" align="right"><b>مبلغ نهایی قابل پرداخت</b></td>
+      <td align="left"><b>{{TOTAL_AMOUNT}}</b></td>
+    </tr>
+  </table>
+
+  <p>
+    شناسه پیگیری: <code>{{TRACKING_CODE}}</code>
+    <tg-button type="copy_text" text="{{TRACKING_CODE}}">کپی شناسه</tg-button>
+  </p>
+
+  <tg-button-row align="center">
+    <tg-button type="url" style="success" url="{{PAYMENT_URL}}">پرداخت آنلاین ({{TOTAL_AMOUNT}}) ↗</tg-button>
+    <tg-button type="callback_data" style="primary" data="invoice:pdf:{{INVOICE_NUMBER}}">دریافت PDF</tg-button>
+    <tg-button type="callback_data" style="link" data="invoice:support:{{INVOICE_NUMBER}}">پشتیبانی مالی</tg-button>
+  </tg-button-row>
+  ========================================================================
+-->
+
+<!--
+  USAGE & RENDERING NOTE:
+  1. Python (aiogram 3.30+):
+     - Function: `send_rich_or_fallback` in `references/aiogram-python-recipes.md`.
+     - Pass `rich_message={"html": html, "is_rtl": False}` (or `True` for Persian).
+  2. TypeScript (grammY / Cloudflare Workers):
+     - Function: `sendRichMessage` in `references/grammy-cloudflare-recipes.md`.
+     - Pass `rich_message: { html, is_rtl: false }`.
+-->

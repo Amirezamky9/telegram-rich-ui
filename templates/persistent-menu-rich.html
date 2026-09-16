@@ -1,0 +1,90 @@
+<!--
+  TEMPLATE: Persistent Menu Rich (Bilingual English & Persian)
+  DESCRIPTION: Production-ready rich welcome hub and navigation portal featuring an expandable
+               guide section, quick-feature overview table, custom emoji badges, and multi-action
+               button rows covering web_app, url, callback_data, and switch_inline_query.
+
+  PLACEHOLDER SUBSTITUTION MATRIX:
+  - {{BOT_NAME}}: Public bot display name (e.g., "TeleRich Hub")
+  - {{EMOJI_ROCKET_ID}}: Custom emoji ID for launch/header accent (e.g., "5368324170671202286")
+  - {{USER_FIRST_NAME}}: Recipient first name or display name (e.g., "Alex")
+  - {{MINI_APP_URL}}: HTTPS URL of the Telegram Mini App (e.g., "https://app.example.com")
+  - {{COMMUNITY_CHANNEL_URL}}: HTTPS link to official Telegram broadcast channel (e.g., "https://t.me/example")
+  - {{SEARCH_QUERY_DEFAULT}}: Default query passed to inline search (e.g., "features")
+-->
+
+<h2><tg-emoji emoji-id="{{EMOJI_ROCKET_ID}}">🚀</tg-emoji> {{BOT_NAME}} Portal</h2>
+
+<p>
+  Welcome, <b>{{USER_FIRST_NAME}}</b>! This interactive hub lets you manage subscriptions,
+  browse the rich product catalog, access developer tools, and launch our Mini App.
+</p>
+
+<blockquote expandable>
+  <b>Quick Navigation Guide · راهنمای ناوبری سریع</b><br/>
+  • Tap <b>Open Studio</b> to launch the full-screen visual message editor.<br/>
+  • Use <b>Explore Catalog</b> to inspect tables and responsive slideshows.<br/>
+  • Tap <b>Share Bot</b> to forward this service to your groups or channels.<br/>
+  <br/>
+  <i>فارسی:</i> با دکمه‌های زیر می‌توانید استودیوی کامل، کاتالوگ محصولات و ابزارهای پیام‌رسانی را باز کنید.
+</blockquote>
+
+<table bordered compact>
+  <caption>Available Services · سرویس‌های فعال</caption>
+  <tr>
+    <th align="left">Service</th>
+    <th align="center">Latency</th>
+    <th align="right">Status</th>
+  </tr>
+  <tr>
+    <td align="left">Edge Message API</td>
+    <td align="center">~18ms</td>
+    <td align="right"><b>Online</b></td>
+  </tr>
+  <tr>
+    <td align="left">Mini App Studio</td>
+    <td align="center">Global CDN</td>
+    <td align="right"><b>Active</b></td>
+  </tr>
+  <tr>
+    <td align="left">Channel Publisher</td>
+    <td align="center">Real-time</td>
+    <td align="right"><b>Operational</b></td>
+  </tr>
+</table>
+
+<!-- Primary actions: Web App (private chats only) and Catalog callback -->
+<tg-button-row align="center">
+  <tg-button type="web_app" style="primary" url="{{MINI_APP_URL}}">✨ Open Studio · باز کردن استودیو</tg-button>
+  <tg-button type="callback_data" style="success" data="menu:catalog">🛍️ Catalog · کاتالوگ</tg-button>
+</tg-button-row>
+
+<!-- Secondary actions: External Channel URL and Settings callback -->
+<tg-button-row align="center">
+  <tg-button type="url" url="{{COMMUNITY_CHANNEL_URL}}">📢 Updates Channel ↗</tg-button>
+  <tg-button type="callback_data" data="menu:settings">⚙️ Settings · تنظیمات</tg-button>
+</tg-button-row>
+
+<!-- Inline search & sharing across chats -->
+<tg-button-row align="center">
+  <tg-button type="switch_inline_query_chosen_chat"
+             query="{{SEARCH_QUERY_DEFAULT}}"
+             allow-user-chats
+             allow-group-chats
+             allow-channel-chats>
+    🔍 Share &amp; Search · اشتراک‌گذاری
+  </tg-button>
+</tg-button-row>
+
+<!--
+  USAGE & RENDERING NOTE:
+  1. Python (aiogram 3.30+):
+     - Function: `send_rich_or_fallback(bot, chat_id, html_string)` from `references/aiogram-python-recipes.md`.
+     - Remember that `web_app` buttons are strictly supported in private 1-on-1 chats.
+  2. TypeScript (grammY / Cloudflare Workers):
+     - Function: `sendRichMessage(bot, { chat_id, rich_message: { html } })` from `references/grammy-cloudflare-recipes.md`.
+
+  MANDATORY SUBSTITUTIONS:
+  Replace {{BOT_NAME}}, {{EMOJI_ROCKET_ID}}, {{USER_FIRST_NAME}}, {{MINI_APP_URL}},
+  {{COMMUNITY_CHANNEL_URL}}, and {{SEARCH_QUERY_DEFAULT}} with sanitized strings.
+-->
