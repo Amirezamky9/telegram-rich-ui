@@ -1,6 +1,6 @@
 ---
 name: telegram-rich-ui
-description: Build, review, migrate, or troubleshoot Telegram Bot API 10.3 rich-message interfaces, including rich HTML/Markdown/blocks, tables, buttons, media, RTL, ephemeral messages, AI draft streaming, aiogram 3.31+, and grammY 1.46+ on Cloudflare Workers. Use when an agent must design polished Telegram bot UI, generate correct Bot API payloads, choose between native framework APIs and direct HTTP, validate rich-message schemas or limits, implement stop-aware streaming, or produce reliable legacy fallbacks without inventing unsupported Telegram behavior.
+description: Build, review, migrate, or troubleshoot Telegram Bot API 10.3 rich-message interfaces, including premium/custom emoji discovery and selection, rich HTML/Markdown/blocks, tables, buttons, media, RTL, ephemeral messages, AI draft streaming, aiogram 3.31+, and grammY 1.46+ on Cloudflare Workers. Use when an agent must design polished Telegram bot UI, find verified custom emoji IDs and fallbacks for text or button icons, generate correct Bot API payloads, validate schemas or limits, implement stop-aware streaming, or produce reliable fallbacks without inventing unsupported Telegram behavior.
 ---
 
 # Telegram Rich UI
@@ -80,6 +80,7 @@ Do not assume old clients will transform every rich construct in a specific way.
 
 - `assets/aiogram-starter/`: minimal aiogram 3.31+ starter.
 - `assets/grammy-cloudflare-worker/`: Cloudflare Workers + grammY starter with webhook secret validation.
+- `assets/emoji-catalog/`: deduplicated JSON/CSV custom-emoji registry, curated UI sets, Iranian/Persian pack inventory, and source provenance.
 - `assets/templates/`: rich HTML examples, including a Persian RTL dashboard, suitable for adaptation after placeholder escaping.
 
 ## Deterministic helpers
@@ -88,6 +89,10 @@ Do not assume old clients will transform every rich construct in a specific way.
 - `scripts/validate_rich_message.py`: structural preflight for JSON rich-message payloads.
 - `scripts/legacy_fallback.py`: rich HTML to safe plain-text fallback.
 - `scripts/thinking_draft_demo.py`: dependency-free Bot API draft/final lifecycle demo.
+- `scripts/search_emoji.py`: semantic custom-emoji search with HTML and button-icon output.
+- `scripts/validate_emoji_catalog.py`: dedupe, readiness, curated-set, regional inventory, and search-regression validation.
+- `scripts/import_emoji_pack.py`: import a `t.me/addemoji/...` set via official `getStickerSet` metadata.
+- `scripts/enrich_custom_emoji.py`: enrich pending IDs via `getCustomEmojiStickers` in Bot API-sized batches.
 
 ## Security and reliability
 
