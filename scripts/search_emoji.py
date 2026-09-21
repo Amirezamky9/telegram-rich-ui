@@ -9,34 +9,28 @@ CATALOG=ROOT/"assets/emoji-catalog/catalog.json"
 def norm(value: object) -> str:
     return re.sub(r"[_\-]+"," ",str(value or "").casefold()).strip()
 
-def fields(r):
-    exact=set()
-    weighted=[]
-    for key,weight in (("name",8),("fallback",10),("category",6),("style_family",5)):
-        v=r.get(key)
-        if v:
-            n=norm(v); exact.add(n); weighted.append((n,weight))
-    for key,weight in (("aliases",9),("keywords",7),("tags",6),("packs",4),("sources",1)):
-        for v in r.get(key) or []:
-            n=norm(v); exact.add(n); weighted.append((n,weight))
-    desc=norm(r.get("description"))
-    if desc: weighted.append((desc,2))
-    return exact,weighted
-
 def score_record(r, query: str) -> int:
     q=norm(query)
     if not q: return 1
     qtokens=[t for t in q.split() if t]
-    exact,weighted=fields(r)
-    if q in exact: return 100
     score=0
-    for value,weight in weighted:
-        tokens=set(value.split())
-        if q in tokens: score=max(score,60+weight)
-        if len(q)>2 and value.startswith(q+" "): score=max(score,35+weight)
-        if len(q)>3 and any(tok.startswith(q) for tok in tokens): score=max(score,20+weight)
-        if len(qtokens)>1 and all(any(qt==tok or (len(qt)>3 and tok.startswith(qt)) for tok in tokens) for qt in qtokens):
-            score=max(score,45+weight)
+    fields=[
+        (r.get("name"),120),(r.get("fallback"),120),(r.get("category"),95),(r.get("style_family"),80),
+    ]
+    fields += [(v,105) for v in (r.get("aliases") or [])]
+    fields += [(v,90) for v in (r.get("keywords") or [])]
+    fields += [(v,70) for v in (r.get("tags") or [])]
+    fields += [(v,45) for v in (r.get("packs") or [])]
+    fields += [(r.get("description"),20)]
+    for raw,weight in fields:
+        if not raw: continue
+        value=norm(raw); tokens=set(value.split())
+        if value==q: score=max(score,weight)
+        elif q in tokens: score=max(score,weight-10)
+        elif len(q)>3 and any(tok.startswith(q) for tok in tokens): score=max(score,weight-25)
+        elif len(qtokens)>1 and all(any(qt==tok or (len(qt)>3 and tok.startswith(qt)) for tok in tokens) for qt in qtokens):
+            score=max(score,weight-20)
+    if "curated_ui" in (r.get("tags") or []) and score>0: score+=5
     return score
 
 def main():
