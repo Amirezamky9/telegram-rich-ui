@@ -115,3 +115,12 @@ Use these labels mentally and in documentation when ambiguity matters:
 - **Empirical**: observed in a client/runtime but not guaranteed by Telegram.
 
 Never encode human-readable Telegram error `description` text as a stable programmatic contract. Telegram also notes that numeric `error_code` contents can change. Prefer framework-typed exceptions and documented `ResponseParameters` (for example retry information), and treat broad HTTP/error categories defensively rather than matching exact English sentences.
+
+
+## Premium emoji registry sources
+
+- Telegram Bot API custom emoji / Sticker metadata: authoritative runtime source for fallback `Sticker.emoji`, `custom_emoji_id`, `set_name`, and `needs_repainting`.
+- `Zulut30/premium-telegram-emoji` snapshot `348ed01f497bab811c7f835c25b88aefa181fb78`: semantic keys, IDs, fallbacks, and pack references. The registry synthesizes its own descriptions instead of copying source prose.
+- `uuigww/telegram_emoji_for_llm` snapshot `4e7043daf55a123fd37c5162e294d6ed01c92b74` (MIT): broad Unicode-to-custom-emoji mapping.
+- Public Telegram indexes were used to discover/index Iranian custom-emoji packs, including `iranNewz`, `Emojiran`, and `Iranianflaghistory`. Raw regional IDs without Bot API fallback metadata remain non-selectable.
+- `ehub.tg` is documented as an optional discovery/search surface, but was not bulk-imported because this review did not consume a stable bulk export.

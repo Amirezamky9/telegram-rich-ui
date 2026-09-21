@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-21",
+  "policy": {
+    "only_ready_and_selectable": true,
+    "prefer_consistent_style_family": true,
+    "max_decorative_icons_per_card": 6,
+    "note": "Prefer custom emoji for major semantic UI cues. Do not decorate every line or mix unrelated visual styles."
+  },
+  "sets": {
+    "minimal_navigation": {
+      "style_family": "minimal_bw",
+      "purpose": "Menus, settings, navigation, support and account UI",
+      "ids": [
+        "5877260593903177342",
+        "5874960879434338403",
+        "5877301185639091664",
+        "5879896690210639947",
+        "5879770735999717115",
+        "5884510167986343350",
+        "5877465816030515018",
+        "5875082500023258804",
+        "5877468380125990242",
+        "5877410604225924969",
+        "5805532930662996322"
+      ]
+    },
+    "status_alerts": {
+      "purpose": "Success, warning, error, notification and verification states",
+      "ids": [
+        "5206607081334906820",
+        "5447644880824181073",
+        "5210952531676504517",
+        "5879785854284599288",
+        "5458603043203327669",
+        "5805532930662996322",
+        "5424972470023104089"
+      ]
+    },
+    "commerce": {
+      "purpose": "Shop, wallet, card, price, discount and checkout surfaces",
+      "ids": [
+        "5769403330761593044",
+        "5927169041595634481",
+        "5983399041197675256",
+        "5406683434124859552",
+        "5409048419211682843",
+        "5438496463044752972"
+      ]
+    },
+    "ai_tech": {
+      "purpose": "AI assistants, developer tools and technical bot UI",
+      "ids": [
+        "5931415565955503486",
+        "5945217417591397712",
+        "5945210167686601730",
+        "5944955909917646080",
+        "4999005636604723783",
+        "5260480440971570446",
+        "5301137237050663843",
+        "5301233981189005137"
+      ]
+    },
+    "news_metrics": {
+      "purpose": "News, analytics, market/status dashboards",
+      "ids": [
+        "5456140674028019486",
+        "5224607267797606837",
+        "5231200819986047254",
+        "5449683594425410231",
+        "5447183459602669338",
+        "5424818078833715060",
+        "5458603043203327669"
+      ]
+    },
+    "iran_culture": {
+      "purpose": "Persian/Iranian cultural palette using entries with verified fallback",
+      "ids": [
+        "5271878966347601947",
+        "5305336095863485125",
+        "5449885771420934013",
+        "5404835520150773707",
+        "5440354006335495210",
+        "5375282786489880721",
+        "5359370246190801956",
+        "5436040291507247633",
+        "5431783411981228752",
+        "5449505950283078474"
+      ]
+    }
+  }
+}

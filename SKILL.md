@@ -13,12 +13,13 @@ Use this skill as a control plane. Load only the reference files needed for the 
 2. Read `references/SOURCES.md` before making version-sensitive claims.
 3. Read `references/rich-formatting-overview.md` for the core message contract.
 4. Read only the feature references that match the task.
-5. Prefer native framework APIs from the current supported versions documented here.
-6. Generate payload/code.
-7. Run `python3 scripts/validate_skill.py` after changing the skill itself.
-8. For JSON `InputRichMessage` payloads, run `python3 scripts/validate_rich_message.py <file.json>` before shipping.
-9. For user-supplied text, escape or structure it; never interpolate untrusted text into rich HTML attributes.
-10. If a claim is not guaranteed by the official API, label it as a project recommendation or an empirical observation.
+5. For polished bot UI, search the Premium Emoji Registry and prefer a coherent custom-emoji set for major semantic UI cues; never use non-selectable registry records.
+6. Prefer native framework APIs from the current supported versions documented here.
+7. Generate payload/code.
+8. Run `python3 scripts/validate_skill.py` after changing the skill itself.
+9. For JSON `InputRichMessage` payloads, run `python3 scripts/validate_rich_message.py <file.json>` before shipping.
+10. For user-supplied text, escape or structure it; never interpolate untrusted text into rich HTML attributes.
+11. If a claim is not guaranteed by the official API, label it as a project recommendation or an empirical observation.
 
 ## Non-negotiable API rules
 
@@ -57,7 +58,7 @@ Do not assume old clients will transform every rich construct in a specific way.
 | Tables, cells, colspan/rowspan, JSON table schema | `references/tables-and-grids.md` |
 | Rich buttons, actions, styles, restrictions | `references/rich-buttons-and-colors.md` |
 | Slideshow, collage, embedded media, media identifiers | `references/slideshow-and-media.md` |
-| Custom emoji rules and AIActions | `references/custom-emojis-and-stickers.md` |
+| Premium custom emoji registry, search, button icons, Persian/Iranian packs, AIActions | `references/custom-emojis-and-stickers.md` |
 | Draft lifecycle, stop handling, finalization | `references/thinking-drafts-and-streaming.md` |
 | Ephemeral message parameters and edit/delete lifecycle | `references/ephemeral-messages.md` |
 | Python implementation | `references/aiogram-python-recipes.md` |
@@ -65,6 +66,15 @@ Do not assume old clients will transform every rich construct in a specific way.
 | Fallback and compatibility policy | `references/compatibility-and-fallbacks.md` |
 | Polished card/menu/RTL/Mini App UI design patterns | `references/ui-design-patterns.md` |
 | Version/source provenance | `references/SOURCES.md` |
+
+## Premium Emoji Registry
+
+- Search curated UI emoji first: `assets/emoji-catalog/curated-ui.json`.
+- Search the full deduplicated registry with `python3 scripts/search_emoji.py QUERY`.
+- Use only records with `selectable: true`; their fallback emoji is known.
+- Prefer custom emoji in major status/navigation/payment/shop/AI/support cues instead of plain Unicode when a suitable premium entry exists.
+- Keep one visual family per card when practical; premium does not mean visually noisy.
+- The same custom emoji IDs can also be used as `icon_custom_emoji_id` on ordinary inline/reply keyboard buttons where Telegram permits it.
 
 ## Reusable assets
 

@@ -125,6 +125,22 @@ Validate a JSON rich message:
 python3 scripts/validate_rich_message.py tests/fixtures/valid-table.json
 ```
 
+## Premium Emoji Registry
+
+The skill now includes a deduplicated custom-emoji catalog under `assets/emoji-catalog/`.
+Agents should search `curated-ui.json` first for consistent bot UI and fall back to the broader catalog when needed.
+
+```bash
+python3 scripts/search_emoji.py settings
+python3 scripts/search_emoji.py پرداخت --limit 8
+python3 scripts/search_emoji.py ai --format html
+python3 scripts/validate_emoji_catalog.py
+```
+
+Iran/Persian coverage is tracked separately. Raw regional IDs are not selectable until the official Bot API supplies their fallback emoji; this prevents invalid `<tg-emoji>` output.
+
+Custom emoji IDs can be used both in rich text and, where supported by Telegram, as `icon_custom_emoji_id` on ordinary keyboard buttons.
+
 ## Engineering policy
 
 This repository separates three types of statement:

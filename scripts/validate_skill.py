@@ -33,6 +33,15 @@ REQUIRED = [
     "scripts/legacy_fallback.py",
     "scripts/thinking_draft_demo.py",
     "assets/templates/product-catalog-card.html",
+    "assets/emoji-catalog/catalog.json",
+    "assets/emoji-catalog/catalog.csv",
+    "assets/emoji-catalog/curated-ui.json",
+    "assets/emoji-catalog/regional-packs.json",
+    "assets/emoji-catalog/sources.json",
+    "scripts/search_emoji.py",
+    "scripts/validate_emoji_catalog.py",
+    "scripts/enrich_custom_emoji.py",
+    "scripts/import_emoji_pack.py",
     "assets/templates/invoice-receipt.html",
     "assets/templates/persistent-menu-rich.html",
     "assets/templates/persian-rtl-dashboard.html",
@@ -145,6 +154,13 @@ def check_fixtures(errors: list[str]) -> None:
             fail(errors, "invalid rows fixture unexpectedly passed")
 
 
+def check_emoji_catalog(errors: list[str]) -> None:
+    validator = ROOT / "scripts/validate_emoji_catalog.py"
+    proc = subprocess.run([sys.executable, str(validator)], capture_output=True, text=True)
+    if proc.returncode != 0:
+        fail(errors, f"emoji catalog validation failed: {proc.stdout}{proc.stderr}")
+
+
 def check_required(errors: list[str]) -> None:
     for rel in REQUIRED:
         if not (ROOT / rel).is_file():
@@ -162,6 +178,7 @@ def main() -> int:
         check_python(errors)
         check_json(errors)
         check_fixtures(errors)
+        check_emoji_catalog(errors)
     if errors:
         print("VALIDATION FAILED")
         for err in errors:
@@ -176,6 +193,7 @@ def main() -> int:
     print("- Python syntax passed")
     print("- JSON fixtures parsed")
     print("- rich-message fixture semantics passed")
+    print("- premium emoji registry passed dedupe and curated-set validation")
     return 0
 
 
