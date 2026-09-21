@@ -16,7 +16,9 @@ jobs:
       - run: python3 scripts/validate_emoji_catalog.py
       - run: python3 scripts/search_emoji.py settings --limit 3
       - run: python3 scripts/search_emoji.py تنظیمات --limit 1 --format html
+      - run: python3 scripts/search_emoji.py پرداخت --tag commerce --limit 3 --format json
       - run: python3 scripts/search_emoji.py --curated iran_culture --limit 3
+      - run: python3 scripts/search_emoji.py --curated minimal_navigation --limit 3 --format id
       - run: python3 scripts/search_emoji.py settings --limit 1 --format button-json
       - name: Package skill.zip
         run: |

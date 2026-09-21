@@ -124,3 +124,6 @@ Never encode human-readable Telegram error `description` text as a stable progra
 - `uuigww/telegram_emoji_for_llm` snapshot `4e7043daf55a123fd37c5162e294d6ed01c92b74` (MIT): broad Unicode-to-custom-emoji mapping.
 - Public Telegram indexes were used to discover/index Iranian custom-emoji packs, including `iranNewz`, `Emojiran`, and `Iranianflaghistory`. Raw regional IDs without Bot API fallback metadata remain non-selectable.
 - `ehub.tg` is documented as an optional discovery/search surface, but was not bulk-imported because this review did not consume a stable bulk export.
+
+
+Registry invariant: one Telegram `custom_emoji_id` maps to one canonical record. Duplicate appearances across packs/sources are merged into aliases, tags, keywords, packs, and provenance. The CSV is generated from the JSON registry and CI verifies both contain exactly the same IDs.

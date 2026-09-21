@@ -2,10 +2,10 @@
 
 ## 1.3.0 - 2026-09-21
 
-- Added a deduplicated Premium Custom Emoji Registry with JSON and CSV views.
+- Added a deduplicated Premium Custom Emoji Registry with **1,483 unique IDs**, JSON and CSV views.
 - Added curated style-consistent UI sets for navigation, status, commerce, AI/tech, news/metrics, and Persian/Iranian cultural UI.
-- Added Persian/Iranian custom-emoji pack inventory with safe pending-enrichment state.
-- Added registry search, validation, Bot API enrichment, and custom-emoji pack import scripts.
+- Added Persian/Iranian custom-emoji pack inventory with 178 raw `iranNewz` IDs kept in a safe pending-enrichment state, plus discovered `Emojiran` and `Iranianflaghistory` packs.
+- Added ranked semantic/Persian registry search, CSV sync validation, Bot API enrichment, custom-emoji pack import, deterministic export, and search regression tests.
 - Added agent policy to prefer premium custom emoji for major UI cues while avoiding visual clutter.
 - Added support guidance for custom emoji inside rich text and as keyboard button icons.
 - Added duplicate-ID guards and non-selectable state for entries without verified fallback emoji.

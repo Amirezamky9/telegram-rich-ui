@@ -40,6 +40,8 @@ with qualifying additional usernames purchased on Fragment have another eligibil
 
 ## Local registry
 
+For the full registry contract, curated sets, CSV workflow, button recipes, and Persian/Iranian import policy, read `references/premium-emoji-registry.md`.
+
 Read:
 
 - `assets/emoji-catalog/curated-ui.json` first for UI work.

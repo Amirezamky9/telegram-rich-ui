@@ -36,15 +36,15 @@ def score_record(r, query: str) -> int:
 
 def main():
     ap=argparse.ArgumentParser()
-    ap.add_argument("query", nargs="?", default="")
+    ap.add_argument("query", nargs="*", help="English/Persian semantic search terms")
     ap.add_argument("--category")
     ap.add_argument("--style")
-    ap.add_argument("--tag")
+    ap.add_argument("--tag", action="append", default=[])
     ap.add_argument("--pack")
     ap.add_argument("--curated", help="curated set name from curated-ui.json")
     ap.add_argument("--limit", type=int, default=12)
     ap.add_argument("--include-unverified", action="store_true")
-    ap.add_argument("--format", choices=("table","json","html","button-json"), default="table")
+    ap.add_argument("--format", choices=("table","json","html","id","button-json"), default="table")
     args=ap.parse_args()
 
     data=json.loads(CATALOG.read_text(encoding="utf-8"))
@@ -56,21 +56,22 @@ def main():
         cur=json.loads(CURATED.read_text(encoding="utf-8"))
         spec=cur.get("sets",{}).get(args.curated)
         if spec is None:
-            raise SystemExit(f"Unknown curated set: {args.curated}")
+            raise SystemExit("Unknown curated set: "+args.curated+". Available: "+", ".join(sorted(cur.get("sets",{}))))
         curated_order=spec.get("ids",[])
         records=[by_id[cid] for cid in curated_order if cid in by_id]
 
+    query=" ".join(args.query).strip()
     ranked=[]
     for idx,r in enumerate(records):
         if not args.include_unverified and not r.get("selectable"): continue
         if args.category and norm(r.get("category"))!=norm(args.category): continue
         if args.style and norm(r.get("style_family"))!=norm(args.style): continue
-        if args.tag and norm(args.tag) not in {norm(v) for v in (r.get("tags") or [])}: continue
+        if any(norm(tag) not in {norm(v) for v in (r.get("tags") or [])} for tag in args.tag): continue
         if args.pack and norm(args.pack) not in {norm(v) for v in (r.get("packs") or [])}: continue
-        s=score_record(r,args.query)
+        s=score_record(r,query)
         if s>0: ranked.append((s,idx,r))
 
-    if args.curated and not args.query:
+    if args.curated and not query:
         ranked.sort(key=lambda x:x[1])
     else:
         ranked.sort(key=lambda x:(-x[0], x[2].get("style_family") or "", x[2].get("name") or "", int(x[2]["custom_emoji_id"])))
@@ -81,14 +82,17 @@ def main():
     if args.format=="html":
         for r in rows:
             if r.get("fallback"):
-                print(f'<tg-emoji emoji-id="{r["custom_emoji_id"]}">{r["fallback"]}</tg-emoji>  # {r["name"]}')
+                print(f'<tg-emoji emoji-id="{r["custom_emoji_id"]}">{r["fallback"]}</tg-emoji>')
+        return
+    if args.format=="id":
+        for r in rows: print(r["custom_emoji_id"])
         return
     if args.format=="button-json":
         for r in rows:
             print(json.dumps({"icon_custom_emoji_id":r["custom_emoji_id"]},ensure_ascii=False))
         return
-    print("ID\tFALLBACK\tNAME\tCATEGORY\tSTYLE")
+    print("ID\tFALLBACK\tNAME\tCATEGORY\tSTYLE\tPACKS")
     for r in rows:
-        print(f'{r["custom_emoji_id"]}\t{r.get("fallback") or "-"}\t{r.get("name") or "-"}\t{r.get("category") or "-"}\t{r.get("style_family") or "-"}')
+        print(f'{r["custom_emoji_id"]}\t{r.get("fallback") or "-"}\t{r.get("name") or "-"}\t{r.get("category") or "-"}\t{r.get("style_family") or "-"}\t{",".join(r.get("packs") or [])}')
 
 if __name__=="__main__": main()
