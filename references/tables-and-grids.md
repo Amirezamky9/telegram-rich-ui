@@ -1,383 +1,206 @@
-# Tables and Grids (Telegram Bot API 10.3)
+# Tables and grids
 
-Telegram Bot API 10.3 introduces native tabular rendering via `sendRichMessage`. Prior to 10.3, bots attempted tabular layouts using monospace ASCII art inside `<pre>` tags. Those monospace tables frequently distorted on narrow mobile screens due to lack of character wrapping, proportional font scaling, and missing cell borders.
+## Table of contents
 
-The Bot API 10.3 table system renders structured grid cells natively in Telegram clients (Desktop, iOS, Android, and Web) with responsive horizontal scrolling or cell wrapping, clear border boundaries, alternating background fills, and cell alignment controls.
+- [Official table contract](#official-table-contract)
+- [Rich HTML syntax](#rich-html-syntax)
+- [JSON block schema](#json-block-schema)
+- [Rows, colspan, and rowspan](#rows-colspan-and-rowspan)
+- [Column limit](#column-limit)
+- [Alignment](#alignment)
+- [RTL guidance](#rtl-guidance)
+- [Responsive design guidance](#responsive-design-guidance)
+- [Examples](#examples)
+- [Anti-patterns](#anti-patterns)
 
----
+## Official table contract
 
-## Table Syntax & Attributes
+Telegram Bot API 10.3 represents an outgoing structured table as `InputRichBlockTable` with:
 
-Tables are written using standard HTML table markup inside the `rich_message.html` string or mapped to `InputRichBlockTable` in JSON block trees.
+- `type`: always `table`
+- `cells`: two-dimensional array of `RichBlockTableCell`
+- optional `is_bordered`
+- optional `is_striped`
+- optional `is_compact`
+- optional `caption` (`RichText`)
 
-```html
-<table bordered striped compact>
-  <caption>Financial Summary (Q3 2026)</caption>
-  <tr>
-    <th>Department</th>
-    <th align="center">Headcount</th>
-    <th align="right">Budget (USD)</th>
-  </tr>
-  <tr>
-    <td align="left">Engineering</td>
-    <td align="center">42</td>
-    <td align="right">$520,000</td>
-  </tr>
-  <tr>
-    <td align="left">Design & Product</td>
-    <td align="center">16</td>
-    <td align="right">$185,000</td>
-  </tr>
-  <tr>
-    <td colspan="2"><b>Total Allocated</b></td>
-    <td align="right"><b>$705,000</b></td>
-  </tr>
-</table>
-```
+There is no documented top-level `rows` field on `InputRichBlockTable`.
 
-### Table Container Attributes
+`RichText` may be a plain string, an array of rich-text values, or a documented `RichText*` object, so a simple table-cell value such as `{"text": "Keyboard"}` is valid at the Bot API level.
 
-The root `<table>` tag supports three boolean presentation modifiers:
-
-| Attribute | JSON Block Field | Description |
-|:---|:---|:---|
-| `bordered` | `is_bordered: true` | Draws a crisp border grid around all outer edges and between cells (canonical Telegram Bot API field; some client SDKs also accept `has_borders`). |
-| `striped` | `is_striped: true` | Alternates background row shading (light zebra-striping) for readable row scanning. |
-| `compact` | `is_compact: true` | Reduces vertical and horizontal cell padding to fit dense financial data on mobile screens. |
-
-> **Best Practice:** Always include `compact` when displaying more than 3 columns or when row counts exceed 6. It prevents unnecessary vertical screen stretching.
-
-### Table Element Hierarchy
-
-- `<caption>`: Centered title text rendered directly above the table frame.
-- `<tr>`: Defines a table row containing cells.
-- `<th>`: Header cell. Renders text in bold with distinct header background fill and vertical center alignment by default.
-- `<td>`: Standard body data cell.
-
-### Cell Alignment Attributes
-
-Both `<th>` and `<td>` accept horizontal and vertical alignment attributes:
-
-| Attribute | Values | Default | Effect |
-|:---|:---|:---|:---|
-| `align` | `left`, `center`, `right` | `left` (LTR) / `right` (RTL) | Controls horizontal text alignment within the cell. Always align numbers to the `right` and status tags to the `center`. |
-| `valign` | `top`, `middle`, `bottom` | `middle` | Controls vertical alignment within the cell, particularly useful when multi-line text is paired with single-line values. |
-
-### Cell Spanning Attributes
-
-- `colspan="N"`: Expands the cell horizontally across $N$ columns (server-enforced limit: maximum 20 columns per table).
-- `rowspan="N"`: Expands the cell vertically across $N$ rows (maximum recommended: 30).
-
-### فارسی — ساختار و صفات جدول
-- تگ `<table>` سه ویژگی کلیدی دارد:
-  - `bordered`: ایجاد خطوط کادر دور سلول‌ها (در قالب جیسون فیلد استاندارد `is_bordered: true`؛ برخی کتابخانه‌ها `has_borders` را نیز پشتیبانی می‌کنند).
-  - `striped`: راه‌راه کردن سطرهای جدول با پس‌زمینه یکی در میان برای خوانایی بهتر (`is_striped: true`).
-  - `compact`: فشرده‌سازی فاصله‌های داخلی (padding) سلول‌ها تا داده‌های مالی و آماری در صفحه کوچک گوشی بهتر جا شوند (در قالب جیسون فیلد `is_compact: true`).
-- سقف مجاز ستون‌ها در هر جدول حداکثر ۲۰ ستون است.
-- صفات `align="left|center|right"` تراز افقی و `valign="top|middle|bottom"` تراز عمودی متن سلول را تنظیم می‌کنند.
-- اعداد و مبالغ مالی را همیشه با `align="right"` تراز کنید.
-
----
-
-## Grid Consistency & Dimensional Invariants
-
-Telegram's client layout engines require a mathematically consistent rectangular matrix. If row cell counts deviate due to miscalculated `colspan` or unhandled `rowspan` overlaps, clients may fail to render the table or drop into an unformatted raw text fallback.
-
-### The Rectangular Invariant Rule
-
-For any table with $C$ columns and $R$ rows:
-$$\forall r \in [1, R], \quad \sum_{\text{cells in row } r} \text{effective\_width} = C$$
-
-Where $\text{effective\_width}$ includes:
-1. The cell's own `colspan` value (default: 1).
-2. Any `rowspan` spanning into row $r$ from preceding rows $r' < r$.
-
-```
-Correct Grid (3 Columns):
-Row 1: [ Cell A: colspan=1 ] [ Cell B: colspan=1 ] [ Cell C: colspan=1 ]  -> Total = 3
-Row 2: [ Cell D: colspan=2                       ] [ Cell E: colspan=1 ]  -> Total = 3
-Row 3: [ Cell F: colspan=1, rowspan=2 ] [ Cell G: colspan=1 ] [ Cell H ]  -> Total = 3
-Row 4: [ (Cell F spans here)          ] [ Cell I: colspan=2            ]  -> Total = 3
-```
-
-### Common Grid Pitfalls to Avoid
-
-1. **Over-spanning beyond table width:** Specifying `colspan="3"` in a 2-column table pushes row width to 3, causing column collapse.
-2. **Missing cells under `rowspan`:** When cell $X$ on row 1 has `rowspan="2"`, row 2 must define one fewer cell. Adding the full count creates an invalid protruding cell on row 2.
-3. **Empty rows:** Do not emit empty `<tr></tr>` tags; Telegram table parsers treat empty rows as structural errors.
-4. **Exceeding Column Limit:** Telegram enforces a hard limit of **maximum 20 columns per table**. Exceeding this limit causes validation failure.
-
-### Server Error on Inconsistent Grids
-
-Failing to maintain consistent effective cell widths across all rows produces an immediate server error:
-
-```
-400 Bad Request: table rows must have consistent cell counts
-```
-
-Always validate that the sum of `colspan` and active `rowspan` allocations is identical across every row before dispatching rich messages.
-
-### Table Fallback Behavior (Pre-10.1 Clients)
-
-When a rich message containing a `<table>` is delivered to a user on a legacy client (prior to Telegram 10.1) or an unsupported third-party client:
-- The table degrades gracefully to **structured text paragraphs** with line breaks (`\n`).
-- Individual cell data is preserved rather than dropped or failing with an error.
-- Cell values flow sequentially line by line, ensuring readability across all platforms.
-
-### RTL Table Behavior (Persian / Arabic)
-
-Setting `is_rtl: true` in the `InputRichMessage` object adapts tables for right-to-left writing systems:
-- **Column Order:** Column sequence defaults from right to left (the first defined `<th>` and `<td>` render on the far right).
-- **Header Alignment:** Header cells (`<th>`) align text to the right by default.
-- **BiDi Glitch Prevention:** Always wrap Latin identifiers, SKU codes, tracking numbers, currency symbols, and numeric digits in inline `<code>` tags (e.g. `<code>#TRK-9021</code>` or `<code>$104.50</code>`) inside RTL tables. This prevents BiDi reordering bugs where numbers and Latin characters jump across punctuation marks.
-
-### فارسی — قواعد شبکه، خطای سازگاری، رفتار Fallback و جداول راست‌چین (RTL)
-- ساختار ماتریس جدول باید در تمام سطرها مستطیلی و یکدست باشد.
-- اگر یک سلول با `colspan="2"` دو ستون را ادغام کرد، مجموع طول آن سطر با سطرهای دیگر باید دقیقاً برابر بماند.
-- در صورت عدم تطابق تعداد سلول‌های سطرها، سرور تلگرام خطای دقیق زیر را برمی‌گرداند:
-  `400 Bad Request: table rows must have consistent cell counts`
-- **کلاینت‌های قدیمی (قبل از ۱۰.۱):** جدول به صورت پاراگراف‌های متنی ساختاریافته همراه با شکست خط (`\n`) تنزل می‌یابد تا محتوا بدون ارور برای کاربر خوانا بماند.
-- **حالت راست‌چین (`is_rtl: true`):** ترتیب ستون‌ها به طور خودکار از راست به چپ محاسبه شده و سرستون‌ها راست‌چین می‌شوند.
-- **توصیه ضد به هم‌ریختگی (BiDi):** برای جلوگیری از پرش کاراکترها و اعداد، حتماً کدهای پیگیری، شناسه‌های لاتین و ارقام را درون تگ `<code>` قرار دهید.
-
----
-
-## Worked Production Examples
-
-### 1. Financial Invoice
+## Rich HTML syntax
 
 ```html
 <table bordered striped compact>
-  <caption>Invoice #INV-2026-8819</caption>
-  <tr>
-    <th align="left">Item</th>
-    <th align="center">Qty</th>
-    <th align="right">Unit Price</th>
-    <th align="right">Amount</th>
-  </tr>
-  <tr>
-    <td>Cloud Worker Compute (Tier 2)</td>
-    <td align="center">2</td>
-    <td align="right">$25.00</td>
-    <td align="right">$50.00</td>
-  </tr>
-  <tr>
-    <td>Database Storage (100 GB)</td>
-    <td align="center">1</td>
-    <td align="right">$15.00</td>
-    <td align="right">$15.00</td>
-  </tr>
-  <tr>
-    <td>Bandwidth Egress (1 TB)</td>
-    <td align="center">3</td>
-    <td align="right">$10.00</td>
-    <td align="right">$30.00</td>
-  </tr>
-  <tr>
-    <td colspan="3" align="right"><b>Subtotal</b></td>
-    <td align="right">$95.00</td>
-  </tr>
-  <tr>
-    <td colspan="3" align="right">VAT / Tax (10%)</td>
-    <td align="right">$9.50</td>
-  </tr>
-  <tr>
-    <td colspan="3" align="right"><b>Total Due (USD)</b></td>
-    <td align="right"><b>$104.50</b></td>
-  </tr>
-</table>
-```
-
-### 2. E-Commerce Shopping Cart
-
-```html
-<table bordered compact>
-  <caption>🛒 Active Shopping Cart</caption>
+  <caption>Inventory</caption>
   <tr>
     <th align="left">Product</th>
-    <th align="center">Size</th>
-    <th align="center">Qty</th>
-    <th align="right">Price</th>
+    <th align="right">Stock</th>
   </tr>
   <tr>
-    <td>Wireless Noise-Canceling Headphones</td>
-    <td align="center">Black</td>
-    <td align="center">1</td>
-    <td align="right">$189.00</td>
-  </tr>
-  <tr>
-    <td>Braided USB-C Cable (2m)</td>
-    <td align="center">Grey</td>
-    <td align="center">2</td>
-    <td align="right">$38.00</td>
-  </tr>
-  <tr>
-    <td colspan="2" align="left"><i>Promo Discount (WELCOME10)</i></td>
-    <td align="center">-10%</td>
-    <td align="right">-$22.70</td>
-  </tr>
-  <tr>
-    <td colspan="3" align="right"><b>Estimated Total</b></td>
-    <td align="right"><b>$204.30</b></td>
+    <td align="left">Keyboard</td>
+    <td align="right">14</td>
   </tr>
 </table>
 ```
 
-### 3. Order Tracking Summary (with `rowspan` and `valign`)
+Supported presentation attributes map to the structured fields:
 
-```html
-<table bordered striped compact>
-  <caption>Package Delivery Status</caption>
-  <tr>
-    <th align="left">Order Details</th>
-    <th align="left">Information</th>
-  </tr>
-  <tr>
-    <td>Order ID</td>
-    <td><code>#ORD-90421</code></td>
-  </tr>
-  <tr>
-    <td rowspan="2" valign="top">Shipping Destination</td>
-    <td>452 Freedom Avenue, Suite 12</td>
-  </tr>
-  <tr>
-    <td>Tehran, Postal Code 14155</td>
-  </tr>
-  <tr>
-    <td>Courier Service</td>
-    <td>Express Courier (Tracking: <code>TRK-88190</code>)</td>
-  </tr>
-  <tr>
-    <td>Estimated Arrival</td>
-    <td><tg-time unix="1773660000" format="wDT">Tomorrow 16:00</tg-time></td>
-  </tr>
-  <tr>
-    <td>Delivery Status</td>
-    <td><b>In Transit (Out for Delivery)</b></td>
-  </tr>
-</table>
-```
+| Rich HTML | JSON field |
+| --- | --- |
+| `bordered` | `is_bordered` |
+| `striped` | `is_striped` |
+| `compact` | `is_compact` |
 
-### 4. SaaS Feature Matrix / Tier Comparison
+Do not use historical aliases such as `has_borders` as canonical Bot API schema.
 
-```html
-<table bordered striped compact>
-  <caption>Plan Feature Comparison</caption>
-  <tr>
-    <th align="left">Capability</th>
-    <th align="center">Free</th>
-    <th align="center">Pro</th>
-    <th align="center">Enterprise</th>
-  </tr>
-  <tr>
-    <td>Rich Messages</td>
-    <td align="center">500 / mo</td>
-    <td align="center">50,000 / mo</td>
-    <td align="center">Unlimited</td>
-  </tr>
-  <tr>
-    <td>Compact Tables</td>
-    <td align="center">Yes</td>
-    <td align="center">Yes</td>
-    <td align="center">Yes</td>
-  </tr>
-  <tr>
-    <td>Custom Emojis</td>
-    <td align="center">Fallback only</td>
-    <td align="center">Yes</td>
-    <td align="center">Yes</td>
-  </tr>
-  <tr>
-    <td>Dedicated SLA</td>
-    <td align="center">Community</td>
-    <td align="center">24h Email</td>
-    <td align="center">1h 24/7 Phone</td>
-  </tr>
-  <tr>
-    <td>Monthly Fee</td>
-    <td align="center"><b>$0</b></td>
-    <td align="center"><b>$29</b></td>
-    <td align="center"><b>$199</b></td>
-  </tr>
-</table>
-```
+## JSON block schema
 
-### 5. Cryptocurrency / FX Market Price List
-
-```html
-<table bordered striped compact>
-  <caption>Live Market Tickers</caption>
-  <tr>
-    <th align="left">Asset</th>
-    <th align="right">Price (USD)</th>
-    <th align="right">24h Change</th>
-    <th align="center">Signal</th>
-  </tr>
-  <tr>
-    <td><b>TON</b> (Toncoin)</td>
-    <td align="right">$6.85</td>
-    <td align="right">+4.82%</td>
-    <td align="center">BUY</td>
-  </tr>
-  <tr>
-    <td><b>BTC</b> (Bitcoin)</td>
-    <td align="right">$94,250.00</td>
-    <td align="right">+1.15%</td>
-    <td align="center">HOLD</td>
-  </tr>
-  <tr>
-    <td><b>ETH</b> (Ethereum)</td>
-    <td align="right">$3,420.50</td>
-    <td align="right">-0.64%</td>
-    <td align="center">HOLD</td>
-  </tr>
-  <tr>
-    <td><b>SOL</b> (Solana)</td>
-    <td align="right">$198.40</td>
-    <td align="right">+7.30%</td>
-    <td align="center">BUY</td>
-  </tr>
-</table>
-```
-
----
-
-## Block JSON Representation (`InputRichBlockTable`)
-
-When submitting rich messages using the `blocks` parameter rather than raw HTML strings, tables are serialized into typed JSON objects:
+Correct shape:
 
 ```json
 {
   "type": "table",
+  "cells": [
+    [
+      {"text": "Product", "is_header": true, "align": "left"},
+      {"text": "Stock", "is_header": true, "align": "right"}
+    ],
+    [
+      {"text": "Keyboard", "align": "left"},
+      {"text": "14", "align": "right"}
+    ]
+  ],
   "is_bordered": true,
   "is_striped": true,
   "is_compact": true,
-  "caption": {
-    "text": "Product Inventory"
-  },
-  "rows": [
-    {
-      "cells": [
-        { "text": { "text": "Product" }, "is_header": true, "align": "left" },
-        { "text": { "text": "Stock" }, "is_header": true, "align": "center" },
-        { "text": { "text": "Price" }, "is_header": true, "align": "right" }
-      ]
-    },
-    {
-      "cells": [
-        { "text": { "text": "Cloud Server A" }, "align": "left" },
-        { "text": { "text": "14" }, "align": "center" },
-        { "text": { "text": "$49.00" }, "align": "right" }
-      ]
-    }
-  ]
+  "caption": "Inventory"
 }
 ```
 
-> **Field Name Note:** The canonical Telegram Bot API documentation specifies `is_bordered: true`. Some client SDKs or earlier draft schemas accept `has_borders: true`; both map to border rendering, but `is_bordered` is the authoritative Bot API field name.
+Frameworks may wrap `RichText` in generated types. Prefer those generated types when available, but keep the underlying Bot API field name `cells`.
 
-### فارسی — خروجی جیسون و نکات مهم
-- در حالت ارسال با `blocks`، فیلدهای `is_bordered` (یا `has_borders` در برخی SDKها)، `is_striped` و `is_compact` مستقیماً بولین هستند و متن درون سلول‌ها به صورت آبجکت `text` ارسال می‌شود.
-- در کلاینت‌های دسکتاپ و موبایل، در صورتی که جدول بیش از حد عریض باشد، به صورت خودکار قابلیت اسکرول افقی فعال می‌شود تا ساختار پیام آسیب نبیند.
-- همواره از `compact` برای جدول‌های موبایلی استفاده کنید تا تراکم داده‌ها بهینه باشد.
+## Rows, colspan, and rowspan
 
+`RichBlockTableCell` supports `colspan` and `rowspan` when the value is greater than 1.
+
+Do **not** invent a requirement that every source row must contain the same number of cells. Telegram's own Rich HTML examples include a table where earlier rows occupy multiple columns and a later row contains only one cell. The documented hard constraint is the table's maximum of 20 columns, not an equal-source-row-length rule.
+
+When generating dynamic tables:
+
+- require positive integer `colspan`/`rowspan` values;
+- account for active rowspans when estimating effective column usage;
+- keep the effective table width at or below 20 columns;
+- test complex spans with the Telegram clients you support.
+
+Do not branch application logic on an exact human-readable server error sentence for malformed table markup.
+
+## Column limit
+
+Telegram documents a maximum of **20 columns** in a rich-message table.
+
+A mobile-friendly design should generally use fewer. This repository recommends roughly 2-6 columns for normal bot UI, but that is a project design recommendation, not a Telegram limit.
+
+## Alignment
+
+`RichBlockTableCell` supports:
+
+- optional `is_header`;
+- optional `colspan`;
+- optional `rowspan`;
+- horizontal `align`: `left`, `center`, `right`;
+- vertical `valign`: `top`, `middle`, `bottom`.
+
+Rich HTML:
+
+```html
+<tr>
+  <td colspan="2" align="right"><b>Total</b></td>
+  <td align="right">$77.00</td>
+</tr>
+```
+
+Table cells can contain inline formatting. Do not put arbitrary block-level rich content inside a cell.
+
+## RTL guidance
+
+Use `is_rtl: true` on the containing `InputRichMessage` when right-to-left layout is required.
+
+Recommended practices for Persian/Arabic tables:
+
+- keep semantic data order stable in your application model;
+- align labels and narrative text according to the language;
+- isolate long Latin identifiers, tracking codes, or SKU values with inline code or separate cells when it improves readability;
+- test on the Telegram clients you support.
+
+Do not document a particular client column-mirroring behavior as a server guarantee unless Telegram explicitly specifies it.
+
+## Responsive design guidance
+
+Project recommendations:
+
+- Prefer `compact` for data-dense mobile tables.
+- Avoid long prose inside cells.
+- Put secondary details in a `details` block below the table instead of adding many columns.
+- Use short labels and format numbers before interpolation.
+- Consider a list/card layout if content remains wide on small screens.
+
+These are design practices, not API requirements.
+
+## Examples
+
+### Invoice
+
+```html
+<table bordered striped compact>
+  <caption>Invoice</caption>
+  <tr>
+    <th>Description</th>
+    <th align="center">Qty</th>
+    <th align="right">Amount</th>
+  </tr>
+  <tr>
+    <td>Managed hosting</td>
+    <td align="center">1</td>
+    <td align="right">$80.00</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="right"><b>Total</b></td>
+    <td align="right"><b>$80.00</b></td>
+  </tr>
+</table>
+```
+
+### Span pattern similar to Telegram's official example
+
+```html
+<table bordered compact>
+  <tr>
+    <td colspan="2" rowspan="2">A</td>
+    <td>B</td>
+    <td>C</td>
+  </tr>
+  <tr>
+    <td valign="top">D</td>
+    <td valign="middle">E</td>
+  </tr>
+  <tr>
+    <td>Final row may have fewer source cells</td>
+  </tr>
+</table>
+```
+
+## Anti-patterns
+
+Do not:
+
+- emit a JSON table with `rows` instead of `cells`;
+- exceed 20 effective columns;
+- impose an undocumented equal-row-width invariant;
+- place block-level content inside a table cell;
+- interpolate unescaped HTML from database/user values;
+- guess that a malformed table will always fall back to plain text;
+- depend on an exact server error sentence;
+- build a 15-20 column table merely because the API permits it.
+
+Run `scripts/validate_rich_message.py` for generated JSON block trees before dispatch where feasible.

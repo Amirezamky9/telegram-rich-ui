@@ -1,0 +1,20 @@
+<h2>{{BOT_NAME}}</h2>
+<p>Welcome, <b>{{USER_NAME}}</b>. Choose an action below.</p>
+<details>
+  <summary>What can this bot do?</summary>
+  <p>{{HELP_TEXT}}</p>
+</details>
+<table bordered compact>
+  <caption>Services</caption>
+  <tr><th>Service</th><th>Status</th></tr>
+  <tr><td>Catalog</td><td><b>Available</b></td></tr>
+  <tr><td>Support</td><td><b>Available</b></td></tr>
+</table>
+<tg-button-row align="center">
+  <tg-button type="web_app" style="primary" url="{{MINI_APP_URL}}">Open Mini App</tg-button>
+  <tg-button type="callback_data" style="success" data="menu:catalog">Catalog</tg-button>
+</tg-button-row>
+<tg-button-row align="center">
+  <tg-button type="url" url="{{CHANNEL_URL}}">Updates</tg-button>
+  <tg-button type="callback_data" data="menu:support">Support</tg-button>
+</tg-button-row>

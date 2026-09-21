@@ -1,0 +1,17 @@
+<h3>Invoice {{INVOICE_NUMBER}}</h3>
+<p>
+  Customer: <b>{{CUSTOMER_NAME}}</b><br/>
+  Issued: <tg-time unix="{{ISSUE_DATE_UNIX}}" format="wDT">issue date</tg-time>
+</p>
+<table bordered striped compact>
+  <caption>Invoice items</caption>
+  <tr><th>Description</th><th align="center">Qty</th><th align="right">Amount</th></tr>
+  <tr><td>{{ITEM_1}}</td><td align="center">{{ITEM_1_QTY}}</td><td align="right">{{ITEM_1_AMOUNT}}</td></tr>
+  <tr><td>{{ITEM_2}}</td><td align="center">{{ITEM_2_QTY}}</td><td align="right">{{ITEM_2_AMOUNT}}</td></tr>
+  <tr><td colspan="2" align="right"><b>Total</b></td><td align="right"><b>{{TOTAL}}</b></td></tr>
+</table>
+<p>Reference: <code>{{REFERENCE}}</code> <tg-button type="copy_text" text="{{REFERENCE}}">Copy</tg-button></p>
+<tg-button-row align="center">
+  <tg-button type="url" style="success" url="{{PAYMENT_URL}}">Pay invoice</tg-button>
+  <tg-button type="callback_data" style="primary" data="invoice:{{INVOICE_KEY}}">Details</tg-button>
+</tg-button-row>

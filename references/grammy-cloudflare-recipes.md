@@ -1,326 +1,264 @@
-# grammY TypeScript Recipes for Cloudflare Workers (Bot API 10.3)
+# grammY 1.46+ on Cloudflare Workers
 
-This guide adapts the production patterns from `public/worker.js` into idiomatic TypeScript using the `grammY` framework on Cloudflare Workers. It details edge deployment, secret verification, typed raw Bot API 10.3 calls, safe HTML builders, channel administrative authorization, and Workers-specific runtime constraints.
+## Table of contents
 
----
+- [Supported baseline](#supported-baseline)
+- [Why grammY fits Workers](#why-grammy-fits-workers)
+- [Project setup](#project-setup)
+- [Worker lifecycle](#worker-lifecycle)
+- [Webhook security](#webhook-security)
+- [Send rich UI](#send-rich-ui)
+- [Edit rich UI](#edit-rich-ui)
+- [Draft streaming](#draft-streaming)
+- [Stop generation](#stop-generation)
+- [Building polished UI](#building-polished-ui)
+- [Cloudflare state choices](#cloudflare-state-choices)
+- [Deployment](#deployment)
+- [Failure handling](#failure-handling)
 
-## Deployment Architecture & Wrangler Configuration
+## Supported baseline
 
-Cloudflare Workers run on V8 isolates rather than a Node.js runtime. This environment provides sub-millisecond cold starts, global edge termination, and built-in Web standard APIs (`fetch`, `crypto.subtle`, `Response`, `Request`).
+Reviewed against:
 
-### `wrangler.jsonc` Setup
-```jsonc
+- grammY 1.46.0
+- Telegram Bot API 10.3 types exposed by grammY
+- Wrangler 4.135.0
+- grammY's documented Cloudflare Workers Node.js webhook pattern
+
+Current grammY exposes native `sendRichMessage`, `sendRichMessageDraft`, and `sendMessageDraft`. Do not route normal calls through an untyped `raw` escape hatch on this baseline.
+
+## Why grammY fits Workers
+
+grammY supports webhook-driven serverless runtimes and documents Cloudflare Workers deployment. A Worker is a good fit for Telegram bots that:
+
+- handle short webhook transactions;
+- call external APIs;
+- store state in external/Cloudflare services;
+- render Telegram UI without requiring a permanently running process.
+
+Do not run long polling inside a normal Cloudflare Worker request handler.
+
+## Project setup
+
+A complete starter is under `assets/grammy-cloudflare-worker/`.
+
+Core dependencies:
+
+```json
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "telerich-bot",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-09-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "vars": {
-    "ALLOWED_ORIGIN": "https://studio.example.com"
-  }
-}
-```
-
-### Secrets Management
-Configure runtime secrets via Wrangler CLI or the Cloudflare dashboard:
-```bash
-# Required bot token from @BotFather
-npx wrangler secret put BOT_TOKEN
-
-# Random secret string for webhook header verification
-npx wrangler secret put WEBHOOK_SECRET
-
-# Trusted operator authentication key for external browser administration
-npx wrangler secret put ADMIN_KEY
-
-# Optional comma-separated list of allowed admin numeric user IDs
-npx wrangler secret put ADMINS_ID
-```
-
-### Environment Bindings Interface
-```typescript
-export interface Env {
-  BOT_TOKEN: string;
-  WEBHOOK_SECRET: string;
-  ADMIN_KEY?: string;
-  ADMINS_ID?: string;
-  ALLOWED_ORIGIN?: string;
-}
-```
-
----
-
-## Webhook Verification & Timing-Safe Comparison
-
-Telegram delivers webhooks with the `X-Telegram-Bot-Api-Secret-Token` header. Always verify this secret using constant-time comparison via Web Crypto to prevent timing attacks.
-
-```typescript
-const encoder = new TextEncoder();
-
-export async function constantTimeEqual(a: string, b: string): Promise<boolean> {
-  const hash = async (s: string) =>
-    new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(s)));
-  const [ha, hb] = await Promise.all([hash(a), hash(b)]);
-  if (ha.length !== hb.length) return false;
-  let diff = 0;
-  for (let i = 0; i < ha.length; i++) diff |= ha[i] ^ hb[i];
-  return diff === 0;
-}
-```
-
----
-
-## Typed Bot API 10.3 Raw Client
-
-> **Assumption Notice:** As of standard releases of `@grammyjs/types`, Bot API 10.3 methods (`sendRichMessage`, `editRichMessageText`, `sendRichMessageDraft`) are not fully typed in the core library. Use grammY's `bot.api.raw` interface combined with explicit TypeScript contracts:
-
-```typescript
-import { Bot, Context } from "grammy";
-import { Message, InlineKeyboardMarkup } from "grammy/types";
-
-export interface InputRichMessage {
-  html?: string;
-  markdown?: string;
-  blocks?: any[];
-  is_rtl?: boolean;
-}
-
-export interface SendRichMessagePayload {
-  chat_id: number | string;
-  rich_message: InputRichMessage;
-  message_thread_id?: number;
-  disable_notification?: boolean;
-  protect_content?: boolean;
-  ephemeral_message_parameters?: {
-    receiver_user_id?: number;
-    callback_query_id?: string;
-  };
-  reply_markup?: InlineKeyboardMarkup;
-}
-
-export interface EditRichMessagePayload {
-  chat_id?: number | string;
-  message_id?: number;
-  inline_message_id?: string;
-  rich_message: InputRichMessage;
-  reply_markup?: InlineKeyboardMarkup;
-}
-
-// Type-safe raw execution wrappers
-export async function sendRichMessage(
-  bot: Bot<Context>,
-  payload: SendRichMessagePayload
-): Promise<Message> {
-  return await bot.api.raw.sendRichMessage(payload as any) as Message;
-}
-
-export async function editRichMessageText(
-  bot: Bot<Context>,
-  payload: EditRichMessagePayload
-): Promise<Message> {
-  return await bot.api.raw.editMessageText(payload as any) as Message;
-}
-```
-
-### فارسی — معماری ورکر و کلودفلر
-- محیط Cloudflare Workers از ایزوله‌های V8 استفاده می‌کند و سبک‌تر و سریع‌تر از سرورهای معمولی Node.js است.
-- اعتبارسنجی توکن وب‌هوک با تابع `constantTimeEqual` و Web Crypto انجام می‌شود تا در برابر حملات تحلیل زمانی (Timing Attacks) ایمن باشد.
-- از آنجا که پکیج رسمی `@grammyjs/types` ممکن است هنوز متدهای جدید نسخه ۱۰.۳ تلگرام را تایپ نکرده باشد، با استفاده از `bot.api.raw` و تایپ‌های سفارشی، ارسال پیام ریچ بدون ارور کامپایل تایپ‌اسکریپت پیاده‌سازی می‌شود.
-
----
-
-## Type-Safe HTML Builders
-
-```typescript
-export function escapeHtml(value: unknown): string {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-export interface TableOptions {
-  bordered?: boolean;
-  striped?: boolean;
-  compact?: boolean;
-  caption?: string;
-}
-
-export function buildRichTable(
-  headers: string[],
-  rows: (string | number)[][],
-  options: TableOptions = {}
-): string {
-  const flags = [
-    options.bordered !== false ? "bordered" : "",
-    options.striped !== false ? "striped" : "",
-    options.compact !== false ? "compact" : "",
-  ].filter(Boolean).join(" ");
-
-  const headerCells = headers
-    .map((h) => `    <th>${escapeHtml(h)}</th>`)
-    .join("\n");
-
-  const bodyRows = rows
-    .map((row) =>
-      "  <tr>\n" +
-      row.map((cell) => `    <td>${escapeHtml(cell)}</td>`).join("\n") +
-      "\n  </tr>"
-    )
-    .join("\n");
-
-  const captionTag = options.caption
-    ? `  <caption>${escapeHtml(options.caption)}</caption>\n`
-    : "";
-
-  return `<table ${flags}>\n${captionTag}  <tr>\n${headerCells}\n  </tr>\n${bodyRows}\n</table>`;
-}
-
-export interface RichButton {
-  type: "url" | "callback_data" | "web_app" | "copy_text" | "disabled" | "switch_inline_query";
-  label: string;
-  style?: "primary" | "success" | "danger" | "link";
-  url?: string;
-  data?: string;
-  text?: string;
-  query?: string;
-}
-
-export function buildRichButtonRow(
-  buttons: RichButton[],
-  align: "left" | "center" | "right" = "left"
-): string {
-  const rendered = buttons.map((b) => {
-    const attrs = [`type="${b.type}"`];
-    if (b.style) attrs.push(`style="${b.style}"`);
-    if (b.url) attrs.push(`url="${escapeHtml(b.url)}"`);
-    if (b.data) attrs.push(`data="${escapeHtml(b.data)}"`);
-    if (b.text) attrs.push(`text="${escapeHtml(b.text)}"`);
-    if (b.query) attrs.push(`query="${escapeHtml(b.query)}"`);
-    return `  <tg-button ${attrs.join(" ")}>${escapeHtml(b.label)}</tg-button>`;
-  });
-
-  return `<tg-button-row align="${align}">\n${rendered.join("\n")}\n</tg-button-row>`;
-}
-```
-
----
-
-## Complete Worker Handler & Webhook Integration
-
-```typescript
-import { Bot, webhookCallback } from "grammy";
-
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-
-    // 1. Webhook endpoint
-    if (url.pathname === "/webhook") {
-      if (request.method !== "POST") {
-        return new Response("Method Not Allowed", { status: 405 });
-      }
-
-      // Timing-safe secret token verification
-      const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token") || "";
-      if (!env.WEBHOOK_SECRET || !(await constantTimeEqual(secret, env.WEBHOOK_SECRET))) {
-        return new Response("Unauthorized", { status: 401 });
-      }
-
-      // Initialize bot per-request inside Workers
-      const bot = new Bot(env.BOT_TOKEN);
-
-      // Register handlers
-      bot.command("catalog", async (ctx) => {
-        const table = buildRichTable(
-          ["Service", "Tier", "Monthly"],
-          [
-            ["Redis Cache", "Standard", "$15"],
-            ["Workers KV", "Unlimited", "$5"],
-          ],
-          { caption: "Cloud Infrastructure" }
-        );
-        const buttons = buildRichButtonRow(
-          [
-            { type: "callback_data", style: "success", label: "Subscribe", data: "plan:sub:redis" },
-            { type: "copy_text", label: "Coupon", text: "EDGE2026" },
-          ],
-          "center"
-        );
-
-        await sendRichMessage(bot, {
-          chat_id: ctx.chat.id,
-          rich_message: { html: `<h3>Edge Products</h3>\n${table}\n${buttons}` },
-        });
-      });
-
-      bot.on("callback_query:data", async (ctx) => {
-        await ctx.answerCallbackQuery({ text: "Processing your selection..." });
-        if (ctx.callbackQuery.data === "plan:sub:redis" && ctx.msg) {
-          await editRichMessageText(bot, {
-            chat_id: ctx.chat.id,
-            message_id: ctx.msg.message_id,
-            rich_message: {
-              html: "<p>✅ <b>Subscribed to Redis Cache</b></p><p>Check your dashboard for credentials.</p>",
-            },
-          });
-        }
-      });
-
-      // Delegate update parsing and handling to grammY
-      return webhookCallback(bot, "cloudflare-update")(request);
-    }
-
-    return new Response("TeleRich Bot Worker Active", { status: 200 });
+  "dependencies": {
+    "grammy": "1.46.0"
   },
-};
-```
-
----
-
-## Channel Publishing & Administrative Pre-Checks
-
-When publishing rich messages to channels or groups, `public/worker.js` enforces dual administrative checks (`getChatMember` for both user and bot) to prevent unauthorized posting:
-
-```typescript
-export async function authorizeChannelPublish(
-  bot: Bot<Context>,
-  chatId: number | string,
-  userId: number
-): Promise<boolean> {
-  const [botMember, userMember] = await Promise.all([
-    bot.api.getChatMember(chatId, bot.botInfo?.id || (await bot.api.getMe()).id),
-    bot.api.getChatMember(chatId, userId),
-  ]);
-
-  // Both user and bot must be administrators or creators
-  const validStatus = ["administrator", "creator"];
-  if (!validStatus.includes(botMember.status) || !validStatus.includes(userMember.status)) {
-    throw new Error("Both bot and user must be administrators of the destination channel.");
+  "devDependencies": {
+    "wrangler": "4.135.0"
   }
-
-  // The bot must have explicit permission to post messages in channels
-  if (botMember.status === "administrator" && !("can_post_messages" in botMember && botMember.can_post_messages)) {
-    throw new Error("Bot lacks 'can_post_messages' administrator permission in channel.");
-  }
-
-  return true;
 }
 ```
 
----
+The official Node.js Worker pattern imports from `grammy`:
 
-## Cloudflare Workers Runtime Constraints
+```ts
+import { Bot, webhookCallback } from "grammy";
+```
 
-1. **No Node.js Built-in APIs:** Workers do not include `fs`, `net`, `child_process`, or Node's `crypto`. Always use `crypto.subtle` and Web APIs.
-2. **Stateless Execution:** Do not store sessions in in-memory global variables. Use Telegram callback data, Cloudflare KV, or encrypted cookies.
-3. **Execution Limits:** Free tier allows 50ms CPU time; Paid tier allows up to 30s. Use `ctx.waitUntil()` for asynchronous tasks like telemetry or logging that do not delay the HTTP response.
-4. **Fire-and-Forget Pattern:** When Telegram webhooks arrive, acknowledge quickly (`200 OK`) and wrap long-running operations inside `ctx.waitUntil(promise)` to prevent Telegram webhook timeouts.
+grammY also ships a web bundle for browser-like environments, but the documented Node.js Cloudflare Worker setup works with the package's normal import path.
 
-### فارسی — امنیت انتشار و محدودیت‌های محیط ورکر
-- قبل از ارسال پیام به کانال‌ها، حتماً دسترسی ادمین بودن کاربر و ربات و مجوز `can_post_messages` بررسی می‌شود تا از ارسال بدون مجوز جلوگیری گردد.
-- محیط ورکر حافظه پایدار ندارد (Stateless)؛ بنابراین اطلاعات حالت نباید در متغیرهای سراسری ذخیره شوند.
-- با استفاده از `ctx.waitUntil` می‌توان کارهای پس‌زمینه را بدون معطل کردن پاسخ وب‌هوک انجام داد.
+## Worker lifecycle
 
+Avoid a `getMe` call on every request. The official grammY Cloudflare Node.js pattern supplies known bot info to the `Bot` constructor.
+
+Recommended environment:
+
+```ts
+interface Env {
+  BOT_TOKEN: string;
+  BOT_INFO: string;
+  WEBHOOK_SECRET: string;
+}
+```
+
+`BOT_INFO` is the JSON `result` object from Telegram `getMe` and is non-secret bot metadata. Keep `BOT_TOKEN` and `WEBHOOK_SECRET` as Worker secrets.
+
+Construct the bot per request or cache safe module-level data as appropriate for Workers. Do not assume a Worker isolate is permanent.
+
+## Webhook security
+
+When calling `setWebhook`, provide Telegram's `secret_token`.
+
+Then let grammY verify the `X-Telegram-Bot-Api-Secret-Token` header through `webhookCallback`:
+
+```ts
+return webhookCallback(bot, "cloudflare-mod", {
+  secretToken: env.WEBHOOK_SECRET,
+})(request);
+```
+
+Do not write a home-grown string comparison if grammY's adapter already supports the secret-token check.
+
+Use a dedicated path such as `/telegram`; return 404/405 for unrelated requests.
+
+## Send rich UI
+
+`ctx.api.sendRichMessage` is typed in grammY 1.46.0:
+
+```ts
+await ctx.api.sendRichMessage(ctx.chat.id, {
+  html: [
+    "<h3>Order</h3>",
+    "<p>Your order is ready.</p>",
+    "<tg-button-row align=\"center\">",
+    "<tg-button type=\"callback_data\" style=\"primary\" data=\"order:details\">Details</tg-button>",
+    "</tg-button-row>",
+  ].join(""),
+});
+```
+
+No `as any` is needed for normal Bot API 10.3 rich-message calls on the reviewed version.
+
+## Edit rich UI
+
+grammY 1.46.0 accepts either a plain string or an `InputRichMessage` object as the third argument. An object maps to Telegram's `rich_message` parameter.
+
+```ts
+await ctx.api.editMessageText(chatId, messageId, {
+  html: "<p><b>Updated</b></p>",
+});
+```
+
+Inside a context for the message being edited, the corresponding context helper accepts the same string-or-rich-message content model. Let TypeScript/IDE autocomplete confirm optional arguments when upgrading grammY.
+
+Never call an invented Telegram endpoint named `editRichMessageText`.
+
+## Draft streaming
+
+```ts
+await ctx.api.sendRichMessageDraft(ctx.chat.id, draftId, {
+  html: "<tg-thinking>Analyzing...</tg-thinking>",
+}, {
+  can_stop: true,
+  keep_on_stop: true,
+});
+
+// ...cancelable work...
+
+await ctx.api.sendRichMessage(ctx.chat.id, {
+  html: "<p>Done.</p>",
+});
+```
+
+Draft streaming is a private-chat feature. Keep `draftId` non-zero.
+
+Do not attach a new direct upload or explicit URL upload to a rich draft. Put media in the final message if needed.
+
+## Stop generation
+
+The Telegram update includes `stopped_message_generation` with chat, optional thread ID, and draft ID.
+
+For short Worker requests, durable generation often runs outside the initial webhook request (for example in a queue, Durable Object, or external model service). Cancellation therefore needs shared state, not only an in-memory map.
+
+Recommended architecture:
+
+```text
+Telegram update
+  -> Worker webhook
+  -> durable job/session keyed by chat_id + draft_id
+  -> abort/cancel flag or provider cancellation
+```
+
+A module-level `Map` is not durable across Worker isolate eviction and must not be your only cancellation state for long-running jobs.
+
+## Building polished UI
+
+For UI quality:
+
+- build reusable render functions that return a complete `InputRichMessage` object;
+- use semantic rich button styles rather than colors encoded in text;
+- keep tables narrow and compact;
+- use `details` for secondary information;
+- use slideshow/collage for visual catalogs;
+- use `tg-time` for recipient-localized dates;
+- set `is_rtl` explicitly for Persian/Arabic UI;
+- keep callback data short and store application state separately;
+- make loading/draft UI visually simpler than the final result.
+
+Example render function:
+
+```ts
+function renderOrder(order: { id: string; total: string }) {
+  const id = escapeHtml(order.id);
+  const total = escapeHtml(order.total);
+  return {
+    html: `<h3>Order ${id}</h3>` +
+      `<table bordered compact>` +
+      `<tr><th>Total</th><td align="right">${total}</td></tr>` +
+      `</table>` +
+      `<tg-button-row align="center">` +
+      `<tg-button type="callback_data" style="primary" data="order:${id}">Details</tg-button>` +
+      `</tg-button-row>`,
+  };
+}
+```
+
+If an identifier can contain arbitrary user input, do not copy it directly into callback data; map it to a validated opaque key.
+
+### Escaping
+
+```ts
+function escapeHtml(value: unknown): string {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+```
+
+Escaping does not replace URL validation or authorization.
+
+## Cloudflare state choices
+
+Choose state based on durability requirements:
+
+- environment variables/secrets: configuration only;
+- KV: read-heavy configuration/cache where eventual consistency is acceptable;
+- D1: relational durable application data;
+- Durable Objects: per-session/per-chat coordination and strongly coordinated state;
+- Queues: deferred/long work and retries;
+- external database/service: when already part of your architecture.
+
+Do not hold durable order/session/generation state only in Worker memory.
+
+## Deployment
+
+Starter commands:
+
+```bash
+npm install
+npx wrangler secret put BOT_TOKEN
+npx wrangler secret put WEBHOOK_SECRET
+npx wrangler secret put BOT_INFO
+npm run deploy
+```
+
+Set `BOT_INFO` to the JSON `result` object from `getMe` (for example as a Worker secret/variable via your deployment system). Do not commit the bot token.
+
+Set Telegram webhook with matching secret:
+
+```bash
+curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/setWebhook" \
+  -d "url=https://YOUR-WORKER.workers.dev/telegram" \
+  -d "secret_token=${WEBHOOK_SECRET}"
+```
+
+After deployment, check `getWebhookInfo` and send a test update.
+
+## Failure handling
+
+- return a successful webhook response only after the update has been accepted for processing by your design;
+- keep handlers within Worker execution constraints;
+- move expensive/long tasks to an appropriate durable async path;
+- use Telegram retry information on 429 responses;
+- log request IDs/update IDs but never bot tokens;
+- make handlers idempotent where Telegram/webhook retries can re-deliver work;
+- treat invalid rich markup as a defect, not as a reason to silently cast to plain text.

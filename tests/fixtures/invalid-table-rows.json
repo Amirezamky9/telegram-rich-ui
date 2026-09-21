@@ -1,0 +1,10 @@
+{
+  "blocks": [
+    {
+      "type": "table",
+      "rows": [
+        {"cells": [{"text": "Wrong shape"}]}
+      ]
+    }
+  ]
+}

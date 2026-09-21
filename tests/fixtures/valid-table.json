@@ -1,0 +1,26 @@
+{
+  "blocks": [
+    {
+      "type": "table",
+      "cells": [
+        [
+          {"text": "Item", "is_header": true},
+          {"text": "Qty", "is_header": true, "align": "right"}
+        ],
+        [
+          {"text": "Keyboard"},
+          {"text": "1", "align": "right"}
+        ]
+      ],
+      "is_bordered": true,
+      "is_compact": true
+    },
+    {
+      "type": "buttons",
+      "buttons": [
+        {"text": "Details", "callback_data": "order:42", "style": "primary"}
+      ],
+      "align": "center"
+    }
+  ]
+}

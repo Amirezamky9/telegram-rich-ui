@@ -1,0 +1,23 @@
+{
+  "blocks": [
+    {
+      "type": "table",
+      "cells": [
+        [
+          {"text": "A", "colspan": 2, "rowspan": 2},
+          {"text": "B"},
+          {"text": "C"}
+        ],
+        [
+          {"text": "D", "valign": "top"},
+          {"text": "E", "valign": "middle"}
+        ],
+        [
+          {"text": "Final row"}
+        ]
+      ],
+      "is_bordered": true,
+      "is_compact": true
+    }
+  ]
+}

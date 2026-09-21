@@ -1,0 +1,19 @@
+<h3>{{PRODUCT_NAME}}</h3>
+<tg-slideshow>
+  <img src="{{IMAGE_1_URL}}"/>
+  <img src="{{IMAGE_2_URL}}"/>
+  <figcaption>{{CAPTION}}<cite>{{BRAND}}</cite></figcaption>
+</tg-slideshow>
+<p>{{DESCRIPTION}}</p>
+<table bordered striped compact>
+  <caption>Specifications</caption>
+  <tr><th>Feature</th><th align="right">Value</th></tr>
+  <tr><td>SKU</td><td align="right"><code>{{SKU}}</code></td></tr>
+  <tr><td>Stock</td><td align="right">{{STOCK}}</td></tr>
+  <tr><td><b>Price</b></td><td align="right"><b>{{PRICE}}</b></td></tr>
+</table>
+<tg-button-row align="center">
+  <tg-button type="url" style="success" url="{{CHECKOUT_URL}}">Buy</tg-button>
+  <tg-button type="callback_data" style="primary" data="cart:{{PRODUCT_KEY}}">Add to cart</tg-button>
+  <tg-button type="copy_text" text="{{SKU}}">Copy SKU</tg-button>
+</tg-button-row>

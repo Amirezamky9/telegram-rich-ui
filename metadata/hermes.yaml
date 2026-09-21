@@ -1,0 +1,17 @@
+name: telegram-rich-ui
+version: 1.2.0
+author: Coding Supervisor
+license: MIT
+platforms:
+  - linux
+  - macos
+  - windows
+tags:
+  - telegram
+  - bot-api-10-3
+  - rich-messages
+  - aiogram
+  - grammy
+  - cloudflare-workers
+  - streaming
+  - rtl

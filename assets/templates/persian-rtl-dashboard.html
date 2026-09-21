@@ -1,0 +1,17 @@
+<h2>داشبورد {{BOT_NAME}}</h2>
+<p>سلام <b>{{USER_NAME}}</b>، وضعیت حساب شما در یک نگاه:</p>
+<table bordered striped compact>
+  <caption>خلاصه وضعیت</caption>
+  <tr><th align="right">بخش</th><th align="left">وضعیت</th></tr>
+  <tr><td align="right">سفارش فعال</td><td align="left"><b>{{ORDER_STATUS}}</b></td></tr>
+  <tr><td align="right">مبلغ</td><td align="left"><b>{{TOTAL}}</b></td></tr>
+  <tr><td align="right">کد پیگیری</td><td align="left"><code>{{TRACKING_CODE}}</code></td></tr>
+</table>
+<details>
+  <summary>جزئیات بیشتر</summary>
+  <p>{{DETAILS}}</p>
+</details>
+<tg-button-row align="center">
+  <tg-button type="callback_data" style="primary" data="order:{{ORDER_KEY}}">جزئیات سفارش</tg-button>
+  <tg-button type="copy_text" text="{{TRACKING_CODE}}">کپی کد پیگیری</tg-button>
+</tg-button-row>

@@ -1,0 +1,41 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  skill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/validate_skill.py
+
+  aiogram:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r assets/aiogram-starter/requirements.txt
+      - run: python3 -m py_compile assets/aiogram-starter/main.py
+      - run: python3 -c "import aiogram; from aiogram.types import InputRichMessage; assert InputRichMessage(html='<p>ok</p>')"
+
+  grammy-worker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: assets/grammy-cloudflare-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: assets/grammy-cloudflare-worker/package.json
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
