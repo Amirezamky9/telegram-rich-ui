@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import json, re, sys
+from search_emoji import score_record
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -34,6 +35,25 @@ def main():
             if cid in iran: errors.append(f"duplicate regional raw id {cid}")
             iran.add(cid)
             if cid not in by_id: errors.append(f"regional id missing from catalog {cid}")
+    # Semantic search regression checks: prevent broad substring/synonym pollution.
+    ready=[r for r in records if r.get("selectable")]
+    search_cases={
+        "support":"5884510167986343350",
+        "shop":"5983399041197675256",
+        "settings":"5341715473882955310",
+        "ai":"5931415565955503486",
+        "یلدا":"5305336095863485125",
+    }
+    for query,expected in search_cases.items():
+        ranked=sorted(((score_record(r,query),r) for r in ready), key=lambda x:(-x[0], x[1].get("name") or ""))
+        ranked=[item for item in ranked if item[0]>0]
+        if not ranked or ranked[0][1].get("custom_emoji_id")!=expected:
+            got=ranked[0][1].get("custom_emoji_id") if ranked else None
+            errors.append(f"search regression for {query!r}: expected top {expected}, got {got}")
+    bad_ai={r.get("name") for s,r in sorted(((score_record(r,"ai"),r) for r in ready),key=lambda x:-x[0])[:10]}
+    if "airpods" in bad_ai or "train" in bad_ai:
+        errors.append("search regression: short query 'ai' matched substring noise")
+
     expected_selectable=sum(bool(r.get("selectable")) for r in records)
     if cat.get("record_count")!=len(records): errors.append("record_count mismatch")
     if cat.get("selectable_count")!=expected_selectable: errors.append("selectable_count mismatch")
