@@ -77,10 +77,31 @@ You can include both thinking and partial content in the same draft update to sh
 
 As the agent progresses, you update the draft — replacing the thinking text, adding rows to a table, or removing the `<tg-thinking>` block entirely as reasoning completes and only content remains.
 
-### فارسی — تگ `<tg-thinking>`
-- این تگ فقط در پیش‌نویس‌ها (`sendRichMessageDraft`) معتبر است و نباید در پیام نهایی استفاده شود.
+### Animated Custom Emojis via AIActions Pack
+
+Telegram officially recommends enhancing `<tg-thinking>` tags with animated custom emojis from the official [AIActions Pack](https://t.me/addemoji/AIActions) (`https://t.me/addemoji/AIActions`), which includes thinking brains (🧠), search magnifiers (🔍), and computational gears (⚙️):
+
+```html
+<tg-thinking>
+  <tg-emoji emoji-id="5368324170671202286">🧠</tg-emoji> Analyzing market data and evaluating risk factors…
+</tg-thinking>
+```
+
+See [Custom Emojis & Stickers](custom-emojis-and-stickers.md) for emoji discovery methods and implementation patterns.
+
+### Plain-Text Alternative: `sendMessageDraft`
+
+For lightweight bots without rich formatting requirements, Telegram Bot API also provides the simpler non-rich `sendMessageDraft` method:
+- Accepts a plain `text` string instead of an `InputRichMessage` object.
+- **Native "Thinking…" Placeholder:** Sending an empty string (`text: ""`) instructs the Telegram client to render a built-in, animated "Thinking…" placeholder bubble.
+- Use `sendRichMessageDraft` whenever you require custom multi-phase thinking messages, custom emojis, tables, buttons, or rich typography.
+
+### فارسی — تگ `<tg-thinking>` و متد `sendMessageDraft`
+- تگ `<tg-thinking>` فقط در پیش‌نویس‌ها (`sendRichMessageDraft`) معتبر است و نباید در پیام نهایی استفاده شود.
 - کلاینت آن را با حباب مات و انیمیشن لرزشی نمایش می‌دهد.
 - برای متن فارسی/عربی، فیلد `is_rtl: true` در `rich_message` تنظیم شود.
+- تلگرام استفاده از اموجی‌های متحرک مجموعه رسمی `https://t.me/addemoji/AIActions` (مانند مغز متفکر، ذره‌بین، چرخ‌دنده‌ها) را درون تگ تفکر پیشنهاد می‌کند.
+- متد ساده متنی `sendMessageDraft`: در صورتی که `text: ""` به صورت رشته خالی ارسال شود، تلگرام پلیس‌هولدر بومی "Thinking…" را به صورت خودکار به کاربر نمایش می‌دهد.
 
 ---
 
@@ -177,17 +198,27 @@ while not task_complete:
 
 ### Handling `stopped_message_generation`
 
-When `can_stop: true` is set and the user taps the stop button, Telegram sends an update of type `stopped_message_generation` containing the `chat_id` and `draft_id`. Your bot should:
+When `can_stop: true` is set and the user taps the stop button, Telegram delivers an update containing a `stopped_message_generation` field of type `MessageGenerationStopped`.
 
-1. Cancel the background task (LLM inference, etc.).
-2. If `keep_on_stop` was `true`, send the partial result as a final `sendRichMessage`.
+#### `MessageGenerationStopped` Type Schema
+
+| Field | Type | Required | Description |
+|:---|:---|:---|:---|
+| `chat` | `Chat` | Yes | Chat where message generation was stopped by the user. |
+| `draft_id` | `Integer` | Yes | Unique identifier of the active draft that was stopped. |
+| `message_thread_id` | `Integer` | Optional | Identifier of the message thread for topic chats. |
+
+Your bot should:
+1. Immediately cancel the running background task or token stream (e.g. via `AbortController` in JS/TS or `asyncio.Task.cancel()` in Python) to save LLM tokens.
+2. If `keep_on_stop` was `true`, send the accumulated partial result as a final `sendRichMessage`.
 3. If `keep_on_stop` was `false`, send nothing — Telegram discards the draft automatically.
 
-### فارسی — چرخه اجرا
+### فارسی — چرخه اجرا و رویداد توقف کاربر
 ۱. دریافت پیام کاربر و ساخت `draft_id`.
-۲. ارسال پیش‌نویس با `<tg-thinking>` — حباب مات نمایش داده می‌شود.
-۳. پردازش طولانی (استنتاج مدل، کوئری دیتابیس). در صورت نیاز، هر ۱۵ ثانیه پیش‌نویس را بازنویسی کنید.
-۴. ارسال پیام نهایی — تلگرام حباب پیش‌نویس را به‌صورت خودکار جایگزین می‌کند.
+۲. ارسال پیش‌نویس با `<tg-thinking>` — حباب مات با انیمیشن براق نمایش داده می‌شود.
+۳. پردازش طولانی (استنتاج مدل، کوئری دیتابیس). در صورت نیاز، هر ۱۵ ثانیه پیش‌نویس را بازنویسی کنید تا TTL ۳۰ ثانیه‌ای منقضی نشود.
+۴. در صورت توقف توسط کاربر، تلگرام آپدیت `stopped_message_generation` حاوی شیء `MessageGenerationStopped` (با فیلدهای `chat`، `draft_id` و `message_thread_id`) ارسال می‌کند. ربات باید فوراً تسک استنتاج هوش مصنوعی را لغو کند.
+۵. ارسال پیام نهایی — تلگرام حباب پیش‌نویس را به‌صورت خودکار جایگزین می‌کند.
 
 ---
 
@@ -504,25 +535,29 @@ export default {
 - For tasks longer than 25 seconds, implement a **keep-alive loop** that re-sends the thinking draft every 15–20 seconds.
 - If the draft expires before the final message, the user sees a gap — no thinking bubble, then a final message appearing from nowhere. Always finalize before TTL or keep the draft alive.
 
-### `stopped_message_generation` Update
+### `stopped_message_generation` Update (`MessageGenerationStopped`)
 
-When `can_stop: true` is set and the user taps stop:
+When `can_stop: true` is set and the user taps stop, Telegram delivers a `stopped_message_generation` update containing a `MessageGenerationStopped` object:
 
 ```json
 {
   "update_id": 123456789,
   "stopped_message_generation": {
-    "chat": { "id": 123456789, "type": "private" },
+    "chat": {
+      "id": 123456789,
+      "first_name": "Reza",
+      "type": "private"
+    },
     "draft_id": 987654321,
-    "date": 1773660000
+    "message_thread_id": null
   }
 }
 ```
 
 Handle this by:
-1. Canceling the running task / LLM stream.
+1. Canceling the running task / LLM stream immediately.
 2. If `keep_on_stop` was `true`, send accumulated partial output as a final `sendRichMessage`.
-3. If `keep_on_stop` was `false` or not set, do nothing — the draft is discarded.
+3. If `keep_on_stop` was `false` or not set, do nothing — the draft is discarded automatically.
 
 ### Common Errors
 
@@ -536,7 +571,7 @@ Handle this by:
 ### فارسی — مدیریت خطا
 - فاصله حداقل ۳۰۰ میلی‌ثانیه بین فراخوانی‌های `sendRichMessageDraft` رعایت شود.
 - پیش‌نویس بعد از حدود ۳۰ ثانیه بدون بروزرسانی منقضی می‌شود؛ برای پردازش‌های طولانی، هر ۱۵-۲۰ ثانیه پیش‌نویس را تازه‌سازی کنید.
-- در صورت توقف توسط کاربر، آپدیت `stopped_message_generation` دریافت می‌شود.
+- در صورت توقف توسط کاربر، آپدیت `stopped_message_generation` حاوی شیء `MessageGenerationStopped` دریافت می‌شود.
 
 ---
 

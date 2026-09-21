@@ -9,7 +9,7 @@ In addition to traditional URLs and callback actions, rich buttons support clipb
 - **دکمه درون‌خطی (Inline):** داخل تگ `<p>` در کنار کلمات و ایموجی‌ها جریان دارد.
 - **ردیف دکمه (Row-grouped):** با `<tg-button-row>` در ردیف‌های منظم با تراز چپ، وسط یا راست چیده می‌شود.
 - **رنگ‌های معنایی:** رنگ‌های `primary` (آبی)، `success` (سبز)، `danger` (قرمز) و `link` (پیوند ظریف). رنگ‌های دلخواه هگز (Hex) پشتیبانی نمی‌شوند و تم تلگرام اعمال می‌شود.
-- **اقدامات جدید:** کپی متن در کلیپ‌بورد با `copy_text`، باز کردن مینی‌اپ با `web_app`، و وضعیت غیرفعال با `disabled`.
+- **اقدامات جدید:** کپی متن در کلیپ‌بورد با `copy_text`، باز کردن مینی‌اپ با `web_app`، ورود به سایت با `login_url`، و وضعیت غیرفعال با `disabled`.
 
 ---
 
@@ -41,14 +41,14 @@ Rich buttons provide two distinct layout paradigms. Both modes accept all action
 When placed directly inside `<p>`, `<li>`, or `<blockquote>`, the button flows alongside text entities, custom emojis, and localized timestamps. It occupies inline layout space and wraps naturally with adjacent words.
 
 ### 2. Grouped Row Placement (`<tg-button-row>`)
-When placed as a top-level block inside `<tg-button-row>`, buttons form a dedicated button bar. The container controls horizontal alignment via the `align` attribute:
+When placed as a top-level block inside `<tg-button-row>`, buttons form a dedicated button bar. Each `<tg-button-row>` container holds between **1 and 8 buttons** (server-enforced limit: 1 to 8 buttons per row). The container controls horizontal alignment via the `align` attribute:
 - `align="left"` (default): Rows pack from left to right.
 - `align="center"`: Rows center horizontally within the bubble.
 - `align="right"`: Rows align to the right margin.
 
 ### فارسی — تفاوت دو شیوه چیدمان
 - **درون‌خطی (`<tg-button>` داخل `<p>`):** دکمه مثل یک کلمه درون جمله می‌نشیند. مناسب برای لینک‌های ارجاعی، دکمه‌های کپی سریع کد رهگیری یا لایسنس در متن.
-- **بلوک ردیفی (`<tg-button-row>`):** دکمه‌ها را به صورت ردیف‌های منظم افقی دسته‌بندی می‌کند. با ویژگی `align` می‌توان چیدمان را روی `left`، `center` یا `right` تنظیم کرد. مناسب برای گزینه‌های انتخابی فرم‌ها، منوها و دکمه‌های اصلی پرداخت و خرید.
+- **بلوک ردیفی (`<tg-button-row>`):** دکمه‌ها را به صورت ردیف‌های منظم افقی (بین ۱ تا ۸ دکمه در هر ردیف) دسته‌بندی می‌کند. با ویژگی `align` می‌توان چیدمان را روی `left`، `center` یا `right` تنظیم کرد. مناسب برای گزینه‌های انتخابی فرم‌ها، منوها و دکمه‌های اصلی پرداخت و خرید.
 
 ---
 
@@ -65,6 +65,7 @@ Each button type uses a specific attribute to carry its operational payload. Sup
 | `switch_inline_query_current_chat` | `query="..."` | `primary`, `success`, `danger` | Private, groups | Inserts bot username + query directly in the current chat. |
 | `switch_inline_query_chosen_chat` | `query="..."` + flags | `primary`, `success`, `danger` | All chats | Filters target chat types when prompting user for inline query. |
 | `copy_text` | `text="..."` | `primary`, `success`, `danger` | All chats, channels | Copies literal string (1–256 chars) to system clipboard. |
+| `login_url` | `url="..."` | `primary`, `success`, `danger` | All chats | Opens Telegram Login authorization on a BotFather-verified domain. |
 | `disabled` | *(none)* | `primary`, `success`, `danger`, *(default)* | All chats, channels | Renders unclickable disabled button displaying muted text. |
 
 ### Detailed Action Semantics
@@ -122,6 +123,12 @@ Carries string to copy in `text`. When tapped, Telegram client immediately copie
 <tg-button type="disabled" style="danger">Booking Closed</tg-button>
 ```
 Renders an unclickable button with muted typography and disabled interaction states. Useful for preserving grid positions in dynamic booking matrices without triggering empty callbacks.
+
+#### 7. Telegram Login URL (`type="login_url"`)
+```html
+<tg-button type="login_url" style="primary" url="https://auth.example.com/telegram-login">Log in with Telegram</tg-button>
+```
+Carries target authorization endpoint in `url`. Initiates Telegram Login authorization on an external domain previously verified with `@BotFather`. Supported across all chats and channels.
 
 ---
 
@@ -260,7 +267,7 @@ Telegram Bot API strictly enforces that interactive entities cannot be nested wi
 | Error Signature | Root Cause | Resolution |
 |:---|:---|:---|
 | `BUTTON_DATA_INVALID` | `data` attribute exceeds 64 UTF-8 bytes | Shorten callback key or encode state as an ID. |
-| `BUTTON_TYPE_INVALID` | Unrecognized value in `type="..."` | Ensure `type` is one of the 8 supported action strings. |
+| `BUTTON_TYPE_INVALID` | Unrecognized value in `type="..."` | Ensure `type` is one of the 9 supported action strings (`url`, `callback_data`, `web_app`, `switch_inline_query`, `switch_inline_query_current_chat`, `switch_inline_query_chosen_chat`, `copy_text`, `login_url`, `disabled`). |
 | `BUTTON_STYLE_INVALID` | Invalid `style="..."` or hex color used | Use only `primary`, `success`, `danger`, or `link`. |
 | `WEB_APP_NOT_ALLOWED` | `type="web_app"` button sent to channel or group | Restrict Mini App buttons to 1-on-1 private bot chats. |
 | `RICH_MESSAGE_TOO_LONG` | Compiled message exceeds 32,768 characters | Paginate items or deliver full catalog as an external link. |

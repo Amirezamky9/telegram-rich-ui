@@ -34,9 +34,13 @@ Sends a rich message to a specified chat.
 |:---|:---|:---|:---|
 | `chat_id` | `Integer` or `String` | Yes | Target chat ID or `@channelusername`. |
 | `rich_message` | `InputRichMessage` | Yes | Object containing `html`, `markdown`, or `blocks`. |
+| `business_connection_id` | `String` | Optional | ID for sending rich messages on behalf of a Telegram Business account. |
 | `message_thread_id` | `Integer` | Optional | Unique identifier for the target message thread (forum topics). |
+| `direct_messages_topic_id` | `Integer` | Optional | Topic ID for direct messages (bots with direct chat enabled). |
 | `disable_notification` | `Boolean` | Optional | Sends the message silently without notification sound. |
 | `protect_content` | `Boolean` | Optional | Protects content from forwarding and saving. |
+| `allow_paid_broadcast` | `Boolean` | Optional | Enables up to 1000 msg/s at 0.1 Telegram Stars per message beyond normal rate cap. |
+| `message_effect_id` | `String` | Optional | Visual message effect ID (private chats only). |
 | `ephemeral_message_parameters` | `EphemeralMessageParameters` | Optional | Delivers the message as user-private ephemeral in groups. |
 | `reply_parameters` | `ReplyParameters` | Optional | Reply configuration targeting existing message or ephemeral message. |
 | `reply_markup` | `InlineKeyboardMarkup` | Optional | Additional inline keyboard attached below the message. |
@@ -50,7 +54,9 @@ The `rich_message` object accepts **exactly one** content payload:
 | `html` | `String` | Rich HTML formatted string (1–32,768 characters). |
 | `markdown` | `String` | Rich Markdown formatted string (1–32,768 characters). |
 | `blocks` | `Array of InputRichBlock` | Array of structured JSON block objects. |
+| `media` | `Array of InputRichMessageMedia` | Optional. Media array referenced via `tg://photo?id=...`, `tg://video?id=...`, `tg://document?id=...`, `tg://audio?id=...` protocol URIs in HTML/Markdown. |
 | `is_rtl` | `Boolean` | Optional. Explicit text direction (`true` for RTL, `false` for LTR). |
+| `skip_entity_detection` | `Boolean` | Optional. When `true`, disables auto-detection of URLs, phone numbers, bank cards, emails, and hashtags. |
 
 ### `editRichMessageText`
 
@@ -77,9 +83,38 @@ Streams text and structural updates for ongoing generation (e.g. AI bot response
 | `keep_on_stop` | `Boolean` | Optional | Preserves accumulated draft text if user taps stop. |
 | `message_thread_id` | `Integer` | Optional | Thread ID for topic chats. |
 
+### `EphemeralMessageParameters` Schema
+
+Configures ephemeral, user-private messages inside groups and supergroups:
+
+| Field | Type | Required | Description |
+|:---|:---|:---|:---|
+| `receiver_user_id` | `Integer` | Yes | User ID of the exclusive receiver in a group. Other group members cannot see this message. |
+| `callback_query_id` | `String` | Optional | Callback query ID this message responds to. |
+| `replace_callback_query_message` | `Boolean` | Optional | When `true` (new in Bot API 10.3), replaces the message whose button was pressed. |
+
+> **Channel Restriction:** Ephemeral messages are strictly prohibited in broadcast channels. Attempting to send ephemeral parameters to a channel returns:
+> `400 Bad Request: ephemeral messages are not supported in channels`
+
+### Structural Limits & Quotas
+
+Telegram enforces hard limits on rich message AST complexity and payload sizes:
+
+| Metric | Hard Limit | Consequence on Exceeding |
+|:---|:---|:---|
+| **Text Length** | Maximum 32,768 UTF-8 characters | `400 Bad Request: MESSAGE_TOO_LONG` |
+| **Total Blocks** | Maximum 500 blocks per message | Server error compiling AST |
+| **Nesting Depth** | Maximum 16 nesting levels | Block tree rejected by parser |
+| **Media Attachments** | Maximum 50 media items per message | Request rejected |
+| **Table Columns** | Maximum 20 columns per table | Table validation error |
+
 ### فارسی — متدهای API و پارامترها
 - همیشه دقیقاً یکی از کلیدهای `html`، `markdown` یا `blocks` باید ارسال شود. ارسال هم‌زمان چند کلید خطای ۴۰۰ ایجاد می‌کند.
 - برای زبان‌های فارسی و عربی، فیلد `is_rtl: true` جهت متن را راست‌به‌چپ تثبیت می‌کند؛ در صورت ارسال نشدن، کلاینت با کاراکترهای ابتدایی جهت را حدس می‌زند.
+- با `skip_entity_detection: true` می‌توان تشخیص خودکار لینک‌ها، شماره تلفن‌ها، کارت‌های بانکی، ایمیل‌ها و هشتگ‌ها را غیرفعال کرد.
+- فیلد `media` آرایه‌ای از رسانه‌های ارجاع‌شده با پروتکل‌های داخلی (`tg://photo`، `tg://video`، `tg://document`، `tg://audio`) را نگهداری می‌کند.
+- شیء `EphemeralMessageParameters` برای ارسال پیام‌های موقت و خصوصی درون گروه‌ها به کار می‌رود؛ ارسال آن در کانال‌ها خطای `400 Bad Request: ephemeral messages are not supported in channels` می‌دهد. فیلد جدید `replace_callback_query_message` می‌تواند پیام قبلی حاوی دکمه را با پیام موقت جایگزین کند.
+- محدودیت‌های ساختاری قطعی تلگرام: حداکثر ۳۲,۷۶۸ کاراکتر، سقف ۵۰۰ بلوک مستقل در پیام، حداکثر ۱۶ سطح تو در تویی (Nesting)، حداکثر ۵۰ مدیا در یک پیام، و سقف ۲۰ ستون در جدول.
 - استریم پیش‌نویس با `draft_id` انجام می‌شود و تلگرام رویداد توقف کاربر را با آپدیت `stopped_message_generation` گزارش می‌دهد.
 
 ---
@@ -231,7 +266,15 @@ interface OrderItem {
 </aside>
 ```
 
-> *فارسی:* ویژگی جدید ۱۰.۳ نقل‌قول بازشونده با تگ `<blockquote expandable>` است که برای متن‌های طولانی و قوانین حقوقی مناسب است تا فضای چت شلوغ نشود. تگ `<aside><cite>` برای نقل‌قول‌های برجسته همراه با ذکر نام گوینده به کار می‌رود.
+#### Expandable Blockquote JSON Block Types
+
+In structured JSON block trees (`rich_message.blocks`), expandable blockquotes are represented by:
+- `InputRichBlockExpandableBlockQuotation` (when submitting via API)
+- `RichBlockExpandableBlockQuotation` (when received in updates or inspected)
+
+Standard static quotations use `InputRichBlockBlockQuotation` and `RichBlockBlockQuotation`.
+
+> *فارسی:* ویژگی جدید ۱۰.۳ نقل‌قول بازشونده با تگ `<blockquote expandable>` (در ساختار جیسون: `InputRichBlockExpandableBlockQuotation` و `RichBlockExpandableBlockQuotation`) است که برای متن‌های طولانی و قوانین حقوقی مناسب است تا فضای چت شلوغ نشود. تگ `<aside><cite>` برای نقل‌قول‌های برجسته همراه با ذکر نام گوینده به کار می‌رود.
 
 ### 7. Collapsible Disclosures (`<details><summary>`)
 
@@ -260,10 +303,27 @@ Renders a Unix timestamp formatted automatically in the reader's device timezone
 ```
 
 - `unix`: Integer timestamp in seconds since epoch (UTC).
-- `format`: Formatting flags (e.g. `wDT` for weekday + date + time, `D` for date only, `T` for time only).
+- `format`: Formatting flags string.
 - The inner text serves as fallback for legacy clients.
 
-> *فارسی:* تگ `<tg-time>` تاریخ و ساعت یونیکس را بر اساس منطقه زمانی و زبان گوشی هر کاربر نمایش می‌دهد؛ متن درون تگ برای کلاینت‌های قدیمی به عنوان جایگزین استفاده می‌شود.
+#### Format Specification (`format="r|w?[dD]?[tT]?"`)
+
+The `format` attribute accepts formatting flags governed by the regular expression `r|w?[dD]?[tT]?`:
+
+| Flag | Meaning | Description & Example Output |
+|:---|:---|:---|
+| `r` | Relative time | Relative time from now ("5 minutes ago", "in 2 hours"). **Mutually exclusive** with all other flags. |
+| `w` | Weekday | Weekday name formatted in user's device locale (e.g. `Monday` or `دوشنبه`). |
+| `d` | Short date | Numeric short date in user's locale (e.g. `1405/01/15` or `2026-03-25`). |
+| `D` | Full date | Full date with localized month name (e.g. `۲۵ اسفند ۱۴۰۴` or `March 25, 2026`). |
+| `t` | Short time | Short time without seconds (e.g. `14:30`). |
+| `T` | Time with seconds | Full time with seconds (e.g. `14:30:00`). |
+
+- Valid flag combinations follow the regex order, for example: `format="wDT"` (weekday + full date + time with seconds), `format="dt"` (short date + short time), or `format="r"` (relative time alone).
+- `r` is strictly mutually exclusive with all other flags (`w`, `d`, `D`, `t`, `T`).
+- The inner text serves as fallback for legacy clients that do not parse `<tg-time>`.
+
+> *فارسی:* تگ `<tg-time>` تاریخ و ساعت یونیکس را بر اساس منطقه زمانی و زبان گوشی هر کاربر نمایش می‌دهد؛ عبارت باقاعده فرمت‌ها `r|w?[dD]?[tT]?` است که در آن `r` زمان نسبی (غیرقابل ترکیب با بقیه پرچم‌ها)، `w` روز هفته، `d` تاریخ کوتاه، `D` تاریخ کامل با نام ماه، `t` ساعت کوتاه و `T` ساعت با ثانیه‌شمار است. متن درون تگ برای کلاینت‌های قدیمی به عنوان جایگزین استفاده می‌شود.
 
 ### 9. Mathematical Expressions (`<tg-math>`, `<tg-math-block>`)
 

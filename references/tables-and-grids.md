@@ -41,7 +41,7 @@ The root `<table>` tag supports three boolean presentation modifiers:
 
 | Attribute | JSON Block Field | Description |
 |:---|:---|:---|
-| `bordered` | `has_borders: true` | Draws a crisp border grid around all outer edges and between cells. |
+| `bordered` | `is_bordered: true` | Draws a crisp border grid around all outer edges and between cells (canonical Telegram Bot API field; some client SDKs also accept `has_borders`). |
 | `striped` | `is_striped: true` | Alternates background row shading (light zebra-striping) for readable row scanning. |
 | `compact` | `is_compact: true` | Reduces vertical and horizontal cell padding to fit dense financial data on mobile screens. |
 
@@ -65,14 +65,15 @@ Both `<th>` and `<td>` accept horizontal and vertical alignment attributes:
 
 ### Cell Spanning Attributes
 
-- `colspan="N"`: Expands the cell horizontally across $N$ columns (maximum recommended: 20).
+- `colspan="N"`: Expands the cell horizontally across $N$ columns (server-enforced limit: maximum 20 columns per table).
 - `rowspan="N"`: Expands the cell vertically across $N$ rows (maximum recommended: 30).
 
 ### فارسی — ساختار و صفات جدول
 - تگ `<table>` سه ویژگی کلیدی دارد:
-  - `bordered`: ایجاد خطوط کادر دور سلول‌ها.
-  - `striped`: راه‌راه کردن سطرهای جدول با پس‌زمینه یکی در میان برای خوانایی بهتر.
+  - `bordered`: ایجاد خطوط کادر دور سلول‌ها (در قالب جیسون فیلد استاندارد `is_bordered: true`؛ برخی کتابخانه‌ها `has_borders` را نیز پشتیبانی می‌کنند).
+  - `striped`: راه‌راه کردن سطرهای جدول با پس‌زمینه یکی در میان برای خوانایی بهتر (`is_striped: true`).
   - `compact`: فشرده‌سازی فاصله‌های داخلی (padding) سلول‌ها تا داده‌های مالی و آماری در صفحه کوچک گوشی بهتر جا شوند (در قالب جیسون فیلد `is_compact: true`).
+- سقف مجاز ستون‌ها در هر جدول حداکثر ۲۰ ستون است.
 - صفات `align="left|center|right"` تراز افقی و `valign="top|middle|bottom"` تراز عمودی متن سلول را تنظیم می‌کنند.
 - اعداد و مبالغ مالی را همیشه با `align="right"` تراز کنید.
 
@@ -104,11 +105,40 @@ Row 4: [ (Cell F spans here)          ] [ Cell I: colspan=2            ]  -> Tot
 1. **Over-spanning beyond table width:** Specifying `colspan="3"` in a 2-column table pushes row width to 3, causing column collapse.
 2. **Missing cells under `rowspan`:** When cell $X$ on row 1 has `rowspan="2"`, row 2 must define one fewer cell. Adding the full count creates an invalid protruding cell on row 2.
 3. **Empty rows:** Do not emit empty `<tr></tr>` tags; Telegram table parsers treat empty rows as structural errors.
+4. **Exceeding Column Limit:** Telegram enforces a hard limit of **maximum 20 columns per table**. Exceeding this limit causes validation failure.
 
-### فارسی — قواعد شبکه و پایداری جدول
+### Server Error on Inconsistent Grids
+
+Failing to maintain consistent effective cell widths across all rows produces an immediate server error:
+
+```
+400 Bad Request: table rows must have consistent cell counts
+```
+
+Always validate that the sum of `colspan` and active `rowspan` allocations is identical across every row before dispatching rich messages.
+
+### Table Fallback Behavior (Pre-10.1 Clients)
+
+When a rich message containing a `<table>` is delivered to a user on a legacy client (prior to Telegram 10.1) or an unsupported third-party client:
+- The table degrades gracefully to **structured text paragraphs** with line breaks (`\n`).
+- Individual cell data is preserved rather than dropped or failing with an error.
+- Cell values flow sequentially line by line, ensuring readability across all platforms.
+
+### RTL Table Behavior (Persian / Arabic)
+
+Setting `is_rtl: true` in the `InputRichMessage` object adapts tables for right-to-left writing systems:
+- **Column Order:** Column sequence defaults from right to left (the first defined `<th>` and `<td>` render on the far right).
+- **Header Alignment:** Header cells (`<th>`) align text to the right by default.
+- **BiDi Glitch Prevention:** Always wrap Latin identifiers, SKU codes, tracking numbers, currency symbols, and numeric digits in inline `<code>` tags (e.g. `<code>#TRK-9021</code>` or `<code>$104.50</code>`) inside RTL tables. This prevents BiDi reordering bugs where numbers and Latin characters jump across punctuation marks.
+
+### فارسی — قواعد شبکه، خطای سازگاری، رفتار Fallback و جداول راست‌چین (RTL)
 - ساختار ماتریس جدول باید در تمام سطرها مستطیلی و یکدست باشد.
 - اگر یک سلول با `colspan="2"` دو ستون را ادغام کرد، مجموع طول آن سطر با سطرهای دیگر باید دقیقاً برابر بماند.
-- هنگام استفاده از `rowspan="2"` در یک سطر، در سطر بعدی باید یک سلول کمتر تعریف کنید تا سلول بالایی در جای خالی آن قرار گیرد؛ در غیر این صورت جدول کج شده و کلاینت تلگرام ممکن است به رندر متنی خام سوئیچ کند.
+- در صورت عدم تطابق تعداد سلول‌های سطرها، سرور تلگرام خطای دقیق زیر را برمی‌گرداند:
+  `400 Bad Request: table rows must have consistent cell counts`
+- **کلاینت‌های قدیمی (قبل از ۱۰.۱):** جدول به صورت پاراگراف‌های متنی ساختاریافته همراه با شکست خط (`\n`) تنزل می‌یابد تا محتوا بدون ارور برای کاربر خوانا بماند.
+- **حالت راست‌چین (`is_rtl: true`):** ترتیب ستون‌ها به طور خودکار از راست به چپ محاسبه شده و سرستون‌ها راست‌چین می‌شوند.
+- **توصیه ضد به هم‌ریختگی (BiDi):** برای جلوگیری از پرش کاراکترها و اعداد، حتماً کدهای پیگیری، شناسه‌های لاتین و ارقام را درون تگ `<code>` قرار دهید.
 
 ---
 
@@ -319,7 +349,7 @@ When submitting rich messages using the `blocks` parameter rather than raw HTML 
 ```json
 {
   "type": "table",
-  "has_borders": true,
+  "is_bordered": true,
   "is_striped": true,
   "is_compact": true,
   "caption": {
@@ -344,8 +374,10 @@ When submitting rich messages using the `blocks` parameter rather than raw HTML 
 }
 ```
 
+> **Field Name Note:** The canonical Telegram Bot API documentation specifies `is_bordered: true`. Some client SDKs or earlier draft schemas accept `has_borders: true`; both map to border rendering, but `is_bordered` is the authoritative Bot API field name.
+
 ### فارسی — خروجی جیسون و نکات مهم
-- در حالت ارسال با `blocks`، فیلدهای `has_borders`، `is_striped` و `is_compact` مستقیماً بولین هستند و متن درون سلول‌ها به صورت آبجکت `text` ارسال می‌شود.
+- در حالت ارسال با `blocks`، فیلدهای `is_bordered` (یا `has_borders` در برخی SDKها)، `is_striped` و `is_compact` مستقیماً بولین هستند و متن درون سلول‌ها به صورت آبجکت `text` ارسال می‌شود.
 - در کلاینت‌های دسکتاپ و موبایل، در صورتی که جدول بیش از حد عریض باشد، به صورت خودکار قابلیت اسکرول افقی فعال می‌شود تا ساختار پیام آسیب نبیند.
 - همواره از `compact` برای جدول‌های موبایلی استفاده کنید تا تراکم داده‌ها بهینه باشد.
 

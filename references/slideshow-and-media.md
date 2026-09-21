@@ -113,19 +113,25 @@ Renders a geographic location map natively using device map frameworks (Apple Ma
 - `long`: Longitude float between -180.0 and 180.0.
 - `zoom`: Integer zoom level (typically 1 to 20, default 14).
 
-### 5. Document Attachments (`tg://document?id=`)
+### 5. Document & Media Attachments via Internal Protocols
 
-Bot API 10.3 supports embedded document links. In `sendRichMessage`, documents are registered in `rich_message.media` (or block array as `InputRichBlockDocument`) and referenced inline:
+Bot API 10.3 supports referencing media via Telegram internal protocols registered in `rich_message.media` (or block array as `InputRichBlockDocument`):
+- `tg://photo?id=...` — Photo assets
+- `tg://video?id=...` — MP4 video files
+- `tg://audio?id=...` — Audio tracks and streams
+- `tg://document?id=...` — Document and PDF attachments
 
 ```html
 <p>Download our annual financial report: <a href="tg://document?id=q3_report">Q3 Financial Report (PDF)</a></p>
+<p>Listen to executive briefing: <a href="tg://audio?id=audio_briefing">Q3 Executive Briefing (MP3)</a></p>
 ```
 
-### فارسی — سایر انواع مدیا
+### فارسی — سایر انواع مدیا و پروتکل‌های داخلی
 - تگ `<audio>` صوت را همراه با کنترل‌های پلیر تلگرام داخل پیام قرار می‌دهد.
 - تگ `<tg-map lat="..." long="..." zoom="...">` نقشه تعاملی بومی براساس مختصات جغرافیایی رندر می‌کند.
 - پیام‌های صوتی OGG به صورت ویس‌نوت با کلاس `InputMediaVoiceNote` پشتیبانی می‌شوند.
-- اسناد با پروتکل داخلی `tg://document?id=...` در متن الصاق می‌شوند.
+- ارجاع مستقیم به فایل‌های تلگرامی با ۴ پروتکل داخلی مجاز است: `tg://photo?id=...`، `tg://video?id=...`، `tg://audio?id=...` و `tg://document?id=...` (ثبت در آرایه `rich_message.media`).
+- سقف تعداد رسانه‌ها: حداکثر ۵۰ آیتم مدیا در یک پیام ریچ مجاز است.
 
 ---
 
@@ -260,8 +266,14 @@ Guides users sequentially through account setup:
 
 ## Media Troubleshooting & Operational Rules
 
-1. **Unsupported Protocols:** Only `https://` and registered Telegram internal protocols (`tg://photo?id=...`, `tg://document?id=...`) are accepted. Plain `http://` or local filesystem paths will trigger an immediate rejection.
+1. **Unsupported Protocols:** Only `https://` and registered Telegram internal protocols (`tg://photo?id=...`, `tg://video?id=...`, `tg://document?id=...`, `tg://audio?id=...`) are accepted. Plain `http://` or local filesystem paths will trigger an immediate rejection.
 2. **Missing Media Attributes:** Every media tag (`<img>`, `<video>`, `<audio>`) must include a valid `src` attribute. Empty `src=""` causes validation failure.
 3. **Video Format Encoding:** Videos used in `<video>` tags or slideshows must be encoded in H.264 / AVC video with AAC audio in an MP4 container. HEVC/H.265 or WebM formats may fail to render on older mobile devices.
 4. **Timeout Handling:** If using public URLs, ensure your hosting server responds to Telegram crawler requests within 10 seconds. Sluggish CDNs cause `400 Bad Request: failed to get HTTP URL content`.
+5. **Media Count Hard Limit:** A single rich message supports a **maximum of 50 media items** across all slideshows, collages, audio, and attachments combined. Exceeding 50 items results in request rejection.
+
+### فارسی — قوانین و عیب‌یابی مدیا
+- فقط لینک‌های امن `https://` و ۴ پروتکل داخلی تلگرام (`tg://photo`، `tg://video`، `tg://document`، `tg://audio`) مجاز هستند.
+- حداکثر ۵۰ مدیا در یک پیام ریچ مجاز است و عبور از این سقف با رد درخواست مواجه می‌شود.
+- ویدیوها باید حتماً کدک H.264 / AAC در کانتینر MP4 باشند.
 
