@@ -58,7 +58,8 @@ Do not assume old clients will transform every rich construct in a specific way.
 | Tables, cells, colspan/rowspan, JSON table schema | `references/tables-and-grids.md` |
 | Rich buttons, actions, styles, restrictions | `references/rich-buttons-and-colors.md` |
 | Slideshow, collage, embedded media, media identifiers | `references/slideshow-and-media.md` |
-| Premium custom emoji registry, search, button icons, Persian/Iranian packs, AIActions | `references/custom-emojis-and-stickers.md` |
+| Custom emoji rules and AIActions | `references/custom-emojis-and-stickers.md` |
+| Premium emoji registry, semantic search, button icons, curated UI sets, Persian/Iranian packs | `references/premium-emoji-registry.md` |
 | Draft lifecycle, stop handling, finalization | `references/thinking-drafts-and-streaming.md` |
 | Ephemeral message parameters and edit/delete lifecycle | `references/ephemeral-messages.md` |
 | Python implementation | `references/aiogram-python-recipes.md` |
@@ -70,11 +71,11 @@ Do not assume old clients will transform every rich construct in a specific way.
 ## Premium Emoji Registry
 
 - Search curated UI emoji first: `assets/emoji-catalog/curated-ui.json`.
-- Search the full deduplicated registry with `python3 scripts/search_emoji.py QUERY`.
+- Search the full deduplicated registry with `python3 scripts/search_emoji.py QUERY`; use `--curated`, `--pack`, repeated `--tag`, and `--format id|html|json|button-json` when useful.
 - Use only records with `selectable: true`; their fallback emoji is known.
 - Prefer custom emoji in major status/navigation/payment/shop/AI/support cues instead of plain Unicode when a suitable premium entry exists.
 - Keep one visual family per card when practical; premium does not mean visually noisy.
-- The same custom emoji IDs can also be used as `icon_custom_emoji_id` on ordinary inline/reply keyboard buttons where Telegram permits it.
+- For ordinary `InlineKeyboardButton`/`KeyboardButton`, use a selected ID as `icon_custom_emoji_id` where Telegram permits it. For `RichMessageButton`, put a custom-emoji rich-text entity inside the button label instead; these are different APIs.
 
 ## Reusable assets
 
@@ -89,10 +90,11 @@ Do not assume old clients will transform every rich construct in a specific way.
 - `scripts/validate_rich_message.py`: structural preflight for JSON rich-message payloads.
 - `scripts/legacy_fallback.py`: rich HTML to safe plain-text fallback.
 - `scripts/thinking_draft_demo.py`: dependency-free Bot API draft/final lifecycle demo.
-- `scripts/search_emoji.py`: semantic custom-emoji search with HTML and button-icon output.
-- `scripts/validate_emoji_catalog.py`: dedupe, readiness, curated-set, regional inventory, and search-regression validation.
+- `scripts/search_emoji.py`: semantic/Persian/curated custom-emoji search with HTML, ID, JSON, and button-icon output.
+- `scripts/validate_emoji_catalog.py`: dedupe, readiness, CSV sync, curated-set, regional inventory, template-ID/fallback, and search-regression validation.
 - `scripts/import_emoji_pack.py`: import a `t.me/addemoji/...` set via official `getStickerSet` metadata.
 - `scripts/enrich_custom_emoji.py`: enrich pending IDs via `getCustomEmojiStickers` in Bot API-sized batches.
+- `scripts/export_emoji_catalog.py`: regenerate the spreadsheet-friendly CSV from canonical JSON.
 
 ## Security and reliability
 
@@ -116,5 +118,6 @@ Before returning production code or committing changes:
 - Confirm private-chat restrictions for drafts and `web_app` buttons.
 - Confirm stop-generation events cancel upstream work and that `keep_on_stop` is not mistaken for permanent persistence.
 - Confirm untrusted data is escaped.
+- If the UI uses semantic/decorative icons, confirm the agent searched the Premium Emoji Registry first, used only selectable records, preserved the stored fallback, and kept the visual family coherent.
 - Confirm framework-native methods are used when supported.
 - Run repository validation and, where practical, a Telegram canary against a test bot/chat.

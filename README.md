@@ -23,6 +23,7 @@ See `references/SOURCES.md` for provenance and freshness rules.
 - inline rich buttons and button rows
 - collages, slideshows, embedded photo/video/audio/document media
 - custom emoji and AIActions guidance
+- deduplicated Premium Emoji Registry with semantic/Persian search, curated UI palettes, CSV export, and Bot API pack import/enrichment
 - ephemeral messages
 - `sendMessageDraft` and `sendRichMessageDraft`
 - stop-generation handling via `stopped_message_generation`
@@ -50,6 +51,7 @@ See `references/SOURCES.md` for provenance and freshness rules.
 │   ├── rich-buttons-and-colors.md
 │   ├── slideshow-and-media.md
 │   ├── custom-emojis-and-stickers.md
+│   ├── premium-emoji-registry.md
 │   ├── thinking-drafts-and-streaming.md
 │   ├── ephemeral-messages.md
 │   ├── aiogram-python-recipes.md
@@ -127,19 +129,42 @@ python3 scripts/validate_rich_message.py tests/fixtures/valid-table.json
 
 ## Premium Emoji Registry
 
-The skill now includes a deduplicated custom-emoji catalog under `assets/emoji-catalog/`.
-Agents should search `curated-ui.json` first for consistent bot UI and fall back to the broader catalog when needed.
+The skill includes a deduplicated custom-emoji registry under `assets/emoji-catalog/`.
+
+Current reviewed snapshot:
+
+- **1,483 unique** `custom_emoji_id` values;
+- **1,305 ready/selectable** entries with a known Unicode fallback;
+- **178 Persian/Iranian regional IDs** from `iranNewz` held as `needs_enrichment` until Telegram returns their official fallback metadata;
+- curated UI sets for navigation, status, commerce, AI/tech, news/metrics, and Persian/Iranian cultural UI;
+- `catalog.csv` for spreadsheet workflows.
+
+Search:
 
 ```bash
 python3 scripts/search_emoji.py settings
-python3 scripts/search_emoji.py پرداخت --limit 8
-python3 scripts/search_emoji.py ai --format html
+python3 scripts/search_emoji.py تنظیمات
+python3 scripts/search_emoji.py پرداخت --tag commerce
+python3 scripts/search_emoji.py --curated minimal_navigation
+python3 scripts/search_emoji.py --curated commerce --format id
+python3 scripts/search_emoji.py iran --tag persian_ui --format html
+```
+
+Maintain/import:
+
+```bash
+BOT_TOKEN=... python3 scripts/import_emoji_pack.py https://t.me/addemoji/Emojiran \
+  --category regional_iran --style-family Emojiran --tag iran --tag persian --write
+BOT_TOKEN=... python3 scripts/enrich_custom_emoji.py --write
+python3 scripts/export_emoji_catalog.py
 python3 scripts/validate_emoji_catalog.py
 ```
 
-Iran/Persian coverage is tracked separately. Raw regional IDs are not selectable until the official Bot API supplies their fallback emoji; this prevents invalid `<tg-emoji>` output.
+Agents are instructed to prefer suitable Premium custom emoji over plain decorative Unicode for polished UI when the bot is eligible, while keeping usage restrained and style-consistent.
 
-Custom emoji IDs can be used both in rich text and, where supported by Telegram, as `icon_custom_emoji_id` on ordinary keyboard buttons.
+For ordinary keyboard buttons use `icon_custom_emoji_id` where Telegram permits it. For `RichMessageButton`, custom emoji belong inside the RichText button label instead.
+
+See `references/premium-emoji-registry.md`.
 
 ## Engineering policy
 

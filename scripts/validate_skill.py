@@ -29,6 +29,7 @@ REQUIRED = [
     "references/grammy-cloudflare-recipes.md",
     "references/compatibility-and-fallbacks.md",
     "references/ui-design-patterns.md",
+    "references/premium-emoji-registry.md",
     "scripts/validate_rich_message.py",
     "scripts/legacy_fallback.py",
     "scripts/thinking_draft_demo.py",
@@ -42,6 +43,8 @@ REQUIRED = [
     "scripts/validate_emoji_catalog.py",
     "scripts/enrich_custom_emoji.py",
     "scripts/import_emoji_pack.py",
+    "scripts/export_emoji_catalog.py",
+    "assets/emoji-catalog/README.md",
     "assets/templates/invoice-receipt.html",
     "assets/templates/persistent-menu-rich.html",
     "assets/templates/persian-rtl-dashboard.html",
@@ -161,6 +164,26 @@ def check_emoji_catalog(errors: list[str]) -> None:
         fail(errors, f"emoji catalog validation failed: {proc.stdout}{proc.stderr}")
 
 
+def check_emoji_search(errors: list[str]) -> None:
+    searcher = ROOT / "scripts/search_emoji.py"
+    commands = (
+        [sys.executable, str(searcher), "settings", "--limit", "3", "--format", "json"],
+        [sys.executable, str(searcher), "--curated", "minimal_navigation", "--limit", "3", "--format", "json"],
+        [sys.executable, str(searcher), "پرداخت", "--tag", "commerce", "--limit", "3", "--format", "json"],
+    )
+    for command in commands:
+        proc = subprocess.run(command, capture_output=True, text=True)
+        if proc.returncode != 0:
+            fail(errors, f"emoji search smoke failed: {proc.stdout}{proc.stderr}")
+            continue
+        try:
+            rows = json.loads(proc.stdout)
+            if not rows or not all(row.get("selectable") for row in rows):
+                fail(errors, "emoji search smoke returned no selectable records")
+        except json.JSONDecodeError as exc:
+            fail(errors, f"emoji search smoke returned invalid JSON: {exc}")
+
+
 def check_required(errors: list[str]) -> None:
     for rel in REQUIRED:
         if not (ROOT / rel).is_file():
@@ -179,6 +202,7 @@ def main() -> int:
         check_json(errors)
         check_fixtures(errors)
         check_emoji_catalog(errors)
+        check_emoji_search(errors)
     if errors:
         print("VALIDATION FAILED")
         for err in errors:
@@ -193,7 +217,7 @@ def main() -> int:
     print("- Python syntax passed")
     print("- JSON fixtures parsed")
     print("- rich-message fixture semantics passed")
-    print("- premium emoji registry passed dedupe and curated-set validation")
+    print("- premium emoji registry passed dedupe, CSV, curated-set, Persian-search and semantic-search validation")
     return 0
 
 
