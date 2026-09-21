@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-21 — Curated registry audit
+
+- Curate 47 unique UI choices with Persian labels, semantic categories and practical cautions.
+- Preserve per-ID source observations and distinguish source mapping from official metadata verification.
+- Quarantine five non-emoji source fallbacks; retain 1,483 unique IDs (1,300 selectable, 183 pending).
+- Harden search output, import/enrichment, source resolution, regional inventory checks and CSV parity.
+- Add annotated selection guide, audit limitations and offline behavioral regressions to CI.
+
+
 ## 1.3.0 - 2026-09-21
 
 - Added a deduplicated Premium Custom Emoji Registry with **1,483 unique IDs**, JSON and CSV views.

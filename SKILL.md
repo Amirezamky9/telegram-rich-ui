@@ -58,6 +58,8 @@ Do not assume old clients will transform every rich construct in a specific way.
 | Tables, cells, colspan/rowspan, JSON table schema | `references/tables-and-grids.md` |
 | Rich buttons, actions, styles, restrictions | `references/rich-buttons-and-colors.md` |
 | Slideshow, collage, embedded media, media identifiers | `references/slideshow-and-media.md` |
+| Curated emoji choices, Persian labels and usage cautions | `references/curated-emoji-guide.md` |
+| Emoji provenance audit and verification limits | `references/emoji-registry-audit.md` |
 | Custom emoji rules and AIActions | `references/custom-emojis-and-stickers.md` |
 | Premium emoji registry, semantic search, button icons, curated UI sets, Persian/Iranian packs | `references/premium-emoji-registry.md` |
 | Draft lifecycle, stop handling, finalization | `references/thinking-drafts-and-streaming.md` |
@@ -72,7 +74,7 @@ Do not assume old clients will transform every rich construct in a specific way.
 
 - Search curated UI emoji first: `assets/emoji-catalog/curated-ui.json`.
 - Search the full deduplicated registry with `python3 scripts/search_emoji.py QUERY`; use `--curated`, `--pack`, repeated `--tag`, and `--format id|html|json` when useful.
-- Use only records with `selectable: true`; their fallback emoji is known.
+- Use only ready records with `selectable: true`. Read `usage_notes` and `verification`: source-mapped fallbacks are not live Telegram verification. Keep IDs as strings. Use `--verified-only` when official metadata verification is required.
 - Prefer custom emoji in major status/navigation/payment/shop/AI/support cues instead of plain Unicode when a suitable premium entry exists.
 - Keep one visual family per card when practical; premium does not mean visually noisy.
 - For ordinary `InlineKeyboardButton`/`KeyboardButton`, use a selected ID as `icon_custom_emoji_id` where Telegram permits it. For `RichMessageButton`, put a custom-emoji rich-text entity inside the button label instead; these are different APIs.

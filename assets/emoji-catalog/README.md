@@ -12,7 +12,7 @@ This directory is the machine-readable custom-emoji layer for the Telegram Rich 
 
 ## Safety model
 
-- `selectable: true` means the record has a known fallback and may be auto-selected.
+- `selectable: true` means the record has a source-mapped or official fallback and may be selected; it does not mean live Telegram delivery was tested.
 - `selectable: false` means inventory only; enrich it from Telegram before use.
 - Primary dedupe key: `custom_emoji_id`.
 - Duplicate source rows become aliases/keywords/source provenance rather than duplicate records.
@@ -34,3 +34,5 @@ python3 scripts/validate_emoji_catalog.py
 ```
 
 To import or enrich a pack, see `references/premium-emoji-registry.md`.
+
+See `references/curated-emoji-guide.md` for annotated choices and `references/emoji-registry-audit.md` for audit limits. Import CSV identifiers as Text to avoid numeric rounding.

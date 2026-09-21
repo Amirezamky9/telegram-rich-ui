@@ -134,7 +134,7 @@ The skill includes a deduplicated custom-emoji registry under `assets/emoji-cata
 Current reviewed snapshot:
 
 - **1,483 unique** `custom_emoji_id` values;
-- **1,305 ready/selectable** entries with a known Unicode fallback;
+- **1,300 ready/selectable** entries with a known Unicode fallback;
 - **178 Persian/Iranian regional IDs** from `iranNewz` held as `needs_enrichment` until Telegram returns their official fallback metadata;
 - curated UI sets for navigation, status, commerce, AI/tech, news/metrics, and Persian/Iranian cultural UI;
 - `catalog.csv` for spreadsheet workflows.

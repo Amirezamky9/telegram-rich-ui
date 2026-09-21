@@ -3,6 +3,8 @@ from __future__ import annotations
 import csv, json, re
 from pathlib import Path
 from search_emoji import score_record
+from emoji_registry import eligible
+from export_emoji_catalog import csv_row, FIELDS
 
 ROOT=Path(__file__).resolve().parents[1]
 DIR=ROOT/"assets/emoji-catalog"
@@ -16,12 +18,33 @@ def main():
     cat=load("catalog.json"); cur=load("curated-ui.json"); reg=load("regional-packs.json"); src=load("sources.json")
     records=cat.get("records",[])
     by_id={}
+    source_ids={s["id"] for s in src.get("sources",[])}
     for i,r in enumerate(records):
         cid=r.get("custom_emoji_id")
         if not isinstance(cid,str) or not ID_RE.fullmatch(cid or ""):
             errors.append(f"invalid id at records[{i}]: {cid!r}"); continue
         if cid in by_id: errors.append(f"duplicate custom_emoji_id {cid}")
         by_id[cid]=r
+        if not r.get("sources") or not set(r.get("sources",[])) <= source_ids:
+            errors.append(f"{cid}: missing/unknown source reference")
+        if not r.get("provenance"):
+            errors.append(f"{cid}: missing provenance")
+        for observation in r.get("provenance", []):
+            if observation.get("source_id") not in r.get("sources", []) or not observation.get("locator"):
+                errors.append(f"{cid}: unresolved provenance observation")
+        if r.get("selectable") and not any(o.get("fallback") == r.get("fallback") for o in r.get("provenance", [])):
+            errors.append(f"{cid}: fallback has no matching provenance")
+        verification = r.get("verification", {})
+        if verification.get("status") not in {"source_mapped", "pending", "bot_api_verified", "not_returned"}:
+            errors.append(f"{cid}: invalid verification state")
+        if r.get("selectable") and verification.get("status") not in {"source_mapped", "bot_api_verified"}:
+            errors.append(f"{cid}: selectable but verification pending")
+        if verification.get("status") == "bot_api_verified":
+            if not verification.get("checked_at") or verification.get("method") not in {"getStickerSet", "getCustomEmojiStickers"}:
+                errors.append(f"{cid}: missing official verification evidence")
+        if r.get("selectable") and not eligible(r): errors.append(f"{cid}: unsafe selectable record")
+        if r.get("selectable") and r.get("fallback") in {"%", "₽", "…", "⋮", "#"}:
+            errors.append(f"{cid}: text symbol cannot be used as fallback")
         if r.get("selectable") and not r.get("fallback"): errors.append(f"selectable record missing fallback: {cid}")
         if r.get("status")=="ready" and not r.get("selectable"): errors.append(f"ready record not selectable: {cid}")
         if r.get("selectable") and r.get("status")!="ready": errors.append(f"selectable record not ready: {cid}")
@@ -44,25 +67,30 @@ def main():
             r=by_id.get(cid)
             if not r: errors.append(f"curated {set_name} missing {cid}")
             elif not r.get("selectable"): errors.append(f"curated {set_name} uses non-selectable {cid}")
+            elif any(not r.get(field) for field in ("ui_category", "label_fa", "description", "usage_notes", "curation")):
+                errors.append(f"curated {set_name} missing semantic metadata for {cid}")
         declared=spec.get("style_family")
         if declared and any(by_id[c].get("style_family")!=declared for c in ids if c in by_id):
             errors.append(f"curated {set_name} style mismatch")
 
     regional=[]
-    for p in reg.get("packs",[]):
-        regional.extend(p.get("raw_ids",[]) or [])
-    if len(regional)!=len(set(regional)): errors.append("duplicate regional raw IDs")
-    for cid in regional:
-        if cid not in by_id: errors.append(f"regional ID missing from catalog: {cid}")
-    iran_pending=[r for r in records if r.get("category")=="regional_iran" and not r.get("selectable")]
-    iran_pack=next((p for p in reg.get("packs",[]) if p.get("short_name")=="iranNewz"),None)
-    if iran_pack and len(iran_pack.get("raw_ids",[]))!=len(iran_pending): errors.append("iranNewz inventory/pending mismatch")
+    for pack in reg.get("packs", []):
+        ids = pack.get("raw_ids", [])
+        if len(ids) != len(set(ids)): errors.append(f"duplicate IDs within regional pack {pack['short_name']}")
+        regional.extend(ids)
+        for cid in ids:
+            if cid not in by_id: errors.append(f"regional ID missing from catalog: {cid}")
+    # This is discovery inventory, not a count of pending records. Enrichment must not invalidate it.
 
     source_ids=[s.get("id") for s in src.get("sources",[])]
     if len(source_ids)!=len(set(source_ids)): errors.append("duplicate source IDs")
 
     with (DIR/"catalog.csv").open(encoding="utf-8",newline="") as fh:
         csv_rows=list(csv.DictReader(fh))
+    if csv_rows and list(csv_rows[0]) != FIELDS: errors.append("catalog.csv columns differ from export contract")
+    for row in csv_rows:
+        record = by_id.get(row.get("custom_emoji_id"))
+        if record and row != csv_row(record): errors.append(f"catalog.csv stale content: {row['custom_emoji_id']}")
     csv_ids=[r["custom_emoji_id"] for r in csv_rows]
     if len(csv_rows)!=len(records): errors.append("catalog.csv row count mismatch")
     if len(csv_ids)!=len(set(csv_ids)): errors.append("catalog.csv duplicate IDs")

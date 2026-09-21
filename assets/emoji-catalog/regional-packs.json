@@ -191,7 +191,9 @@
         "5949794718857564613"
       ],
       "status": "indexed_needs_fallback_enrichment",
-      "source": "https://t.me/s/customemojipack"
+      "source": "https://t.me/s/customemojipack",
+      "reviewed_at": "2026-09-21",
+      "review_note": "178 inherited public-index IDs retained; exact source post was not preserved and direct pack page could not be rechecked. No semantic or fallback claims; pending official enrichment."
     },
     {
       "short_name": "Emojiran",
@@ -202,7 +204,10 @@
       ],
       "raw_ids": [],
       "status": "discovered_not_indexed",
-      "source": "https://t.me/s/EmojiBin"
+      "source": "https://t.me/s/EmojiBin",
+      "reviewed_at": "2026-09-21",
+      "public_page_title": "iRan - @ArtPJ",
+      "review_note": "Public Telegram addemoji page identifies the pack; individual IDs and artwork not verified."
     },
     {
       "short_name": "Iranianflaghistory",
@@ -213,7 +218,10 @@
       ],
       "raw_ids": [],
       "status": "discovered_not_indexed",
-      "source": "Telegram public pack page"
+      "source": "Telegram public pack page",
+      "reviewed_at": "2026-09-21",
+      "public_page_title": "IRAN Flag",
+      "review_note": "Public Telegram addemoji page identifies the pack; do not infer historical/political symbols from its short name."
     }
   ],
   "excluded_regular_sticker_packs": [

@@ -23,7 +23,8 @@
         "5877468380125990242",
         "5877410604225924969",
         "5805532930662996322"
-      ]
+      ],
+      "style_policy": "single_source_family_not_visually_verified"
     },
     "status_alerts": {
       "purpose": "Success, warning, error, notification and verification states",
@@ -35,7 +36,8 @@
         "5458603043203327669",
         "5805532930662996322",
         "5424972470023104089"
-      ]
+      ],
+      "style_policy": "mixed_families_filter_by_style_or_preview"
     },
     "commerce": {
       "purpose": "Shop, wallet, card, price, discount and checkout surfaces",
@@ -46,7 +48,8 @@
         "5406683434124859552",
         "5409048419211682843",
         "5438496463044752972"
-      ]
+      ],
+      "style_policy": "mixed_families_filter_by_style_or_preview"
     },
     "ai_tech": {
       "purpose": "AI assistants, developer tools and technical bot UI",
@@ -59,7 +62,8 @@
         "5260480440971570446",
         "5301137237050663843",
         "5301233981189005137"
-      ]
+      ],
+      "style_policy": "mixed_families_filter_by_style_or_preview"
     },
     "news_metrics": {
       "purpose": "News, analytics, market/status dashboards",
@@ -71,10 +75,11 @@
         "5447183459602669338",
         "5424818078833715060",
         "5458603043203327669"
-      ]
+      ],
+      "style_policy": "single_source_family_not_visually_verified"
     },
     "iran_culture": {
-      "purpose": "Persian/Iranian cultural palette using entries with verified fallback",
+      "purpose": "General source-mapped cultural vocabulary suitable for Persian UI; not proof of Iranian origin or visually verified Nowruz/Yalda artwork",
       "ids": [
         "5271878966347601947",
         "5305336095863485125",
@@ -86,7 +91,8 @@
         "5436040291507247633",
         "5431783411981228752",
         "5449505950283078474"
-      ]
+      ],
+      "style_policy": "single_source_family_not_visually_verified"
     }
   }
 }

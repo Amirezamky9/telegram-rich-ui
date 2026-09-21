@@ -14,10 +14,12 @@
 - [Deduplication policy](#deduplication-policy)
 - [Safety and quality rules](#safety-and-quality-rules)
 - [Source provenance](#source-provenance)
+- [Metadata and verification contract](#metadata-and-verification-contract)
+- [Agent implementation recipes](#agent-implementation-recipes)
 
 ## Purpose
 
-Use the Premium Emoji Registry whenever a Telegram bot UI benefits from semantic icons. For polished bot UI, prefer a suitable verified custom emoji over a plain Unicode decorative emoji when the bot is eligible and the richer icon improves navigation, status scanning, commerce, AI state, support, or branding.
+Use the Premium Emoji Registry whenever a Telegram bot UI benefits from semantic icons. For polished bot UI, prefer a suitable source-mapped custom emoji over a plain Unicode decorative emoji when the bot is eligible and the richer icon improves navigation, status scanning, commerce, AI state, support, or branding.
 
 Do not decorate every line. Premium emoji are a UI primitive, not confetti.
 
@@ -49,7 +51,7 @@ Do not decorate every line. Premium emoji are a UI primitive, not confetti.
 `assets/emoji-catalog/sources.json`
 : Source provenance and reviewed snapshots.
 
-Current reviewed snapshot: **1,483 unique IDs**, **1,305 ready/selectable**, **178 pending enrichment**.
+Current reviewed snapshot: **1,483 unique IDs**, **1,300 ready/selectable**, **183 pending enrichment** (178 regional IDs plus five invalid source fallbacks).
 
 ## Text and Rich Message usage
 
@@ -122,7 +124,7 @@ The curated registry includes:
 - `commerce` — wallet, card, shop, discount, price/payment.
 - `ai_tech` — bot/AI, ChatGPT, Claude, Gemini, GitHub, Python, Docker, terminal.
 - `news_metrics` — breaking, urgent, statistics, chart up/down, announcements.
-- `iran_culture` — verified-fallback Iranian/Persian-friendly visual vocabulary such as Iran flag, watermelon/Yalda, sprouts/Nowruz, flowers, tea/coffee, celebration, heart.
+- `iran_culture` — source-mapped Iranian/Persian-friendly visual vocabulary such as Iran flag, watermelon/Yalda, sprouts/Nowruz, flowers, tea/coffee, celebration, heart.
 
 Curated sets are deliberately small. Do not add near-duplicates just to increase count.
 
@@ -130,7 +132,7 @@ Curated sets are deliberately small. Do not add near-duplicates just to increase
 
 Two layers are kept separate:
 
-1. **Ready Persian/Iranian palette** — records with known fallback values and `persian_ui`/`iran_culture_palette` tags. These are safe for automatic selection.
+1. **Ready Persian/Iranian palette** — records with known fallback values and `persian_ui`/`iran_culture_palette` tags. These are eligible for selection, not proof of live delivery, visual appearance, or Iranian authorship.
 2. **Regional raw inventory** — custom emoji IDs from Persian/Iranian packs such as `iranNewz`. IDs without verified `Sticker.emoji` remain `needs_enrichment` and `selectable=false`.
 
 Discovered custom emoji packs:
@@ -204,3 +206,58 @@ Major inputs:
 - `ehub.tg` as optional external discovery; no unreviewed bulk export from it is bundled.
 
 The canonical registry stores normalized factual identifiers and project-authored metadata; source prose is not copied.
+
+## Metadata and verification contract
+
+Read `references/curated-emoji-guide.md` for all 47 unique curated choices, grouped by UI use.
+Read `references/emoji-registry-audit.md` for the reviewed snapshot and outstanding limitations.
+
+- `category` preserves the upstream grouping; `ui_category` is the curated semantic grouping.
+- `description`, `label_fa`, `description_fa`, and `usage_notes` are project-authored. Labels and descriptions are not claims about unseen artwork.
+- `style_family` is source-derived. `style_policy` identifies mixed sets; a curated set is not necessarily a visually matching pack. `curation.visual_reviewed=false` explicitly records that distinction.
+- `sources` resolve to `sources.json`. `provenance` records individual source locators, observed fallbacks, aliases and pack associations without overwriting earlier evidence.
+- `verification.status=source_mapped` means the ID/fallback pair matches a recorded third-party snapshot, not Telegram runtime validation.
+- `bot_api_verified` requires `checked_at` and the official method used. It verifies metadata at that time, not delivery eligibility or visual suitability.
+- `pending` and `not_returned` are never UI-selectable. A successful response omitting an ID disables it; a request failure leaves files untouched.
+- A plain symbol such as `%` or `₽` is not a verified emoji fallback. Preserve it in provenance and enrich the ID rather than inventing an alternative.
+
+All IDs are decimal **strings**, including in TypeScript. Import the CSV ID column as Text; spreadsheet numeric inference can irreversibly round 19-digit IDs. JSON is canonical. CSV stores provenance/verification objects as JSON cells and is a generated export, not an import format.
+
+Import/enrichment defaults to dry run. Use `--write` to save, then export and validate. The importer merges repeated IDs and preserves existing descriptions, aliases and tags; new IDs still need semantic curation. `--source-id` must reference an existing source. Official observations override the fallback, retaining earlier source observations. The regional pack file is historical discovery inventory, not a live pending-count report.
+
+```bash
+python3 scripts/search_emoji.py 'پشتیبانی' --curated minimal_navigation --format json
+python3 scripts/search_emoji.py --ui-category commerce --style minimal_bw --format json
+python3 scripts/search_emoji.py 5884510167986343350 --format json
+python3 scripts/search_emoji.py --verified-only --format json
+python3 scripts/search_emoji.py --include-unverified --format json
+```
+
+The last command is for inspection only. `--include-unverified` is rejected with `html`, `id`, or `button-json`; `--verified-only` can correctly return an empty list before official enrichment. Persian search normalizes Arabic ی/ک equivalents, vowel marks and half-spaces. Read `usage_notes` before choosing an icon. `button-json` emits an icon-field fragment, not a complete button.
+
+## Agent implementation recipes
+
+Retrieve a selectable record as JSON, and keep its ID/fallback together. Example TypeScript for grammY/Workers using a selected record:
+
+```ts
+const icon = { custom_emoji_id: "5884510167986343350", fallback: "💬" };
+const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const label = "پشتیبانی";
+const html = `<tg-emoji emoji-id="${icon.custom_emoji_id}">${escapeHtml(icon.fallback)}</tg-emoji> ${escapeHtml(label)}`;
+// sendMessage: pass html with parse_mode: "HTML".
+// sendRichMessage: pass rich_message: { html: `<p>${html}</p>` }.
+const inlineButton = { text: label, icon_custom_emoji_id: icon.custom_emoji_id, callback_data: "support" };
+const replyButton = { text: label, icon_custom_emoji_id: icon.custom_emoji_id };
+const richButton = {
+  text: [{ type: "custom_emoji", custom_emoji_id: icon.custom_emoji_id, alternative_text: icon.fallback }, ` ${label}`],
+  callback_data: "support",
+};
+```
+
+Select only validated decimal-string IDs before inserting them into an HTML attribute. Keep dynamic text escaped. Place `inlineButton` inside `reply_markup.inline_keyboard`, `replyButton` inside `reply_markup.keyboard`, and `richButton` inside a rich button block. Acknowledge callback queries and implement the action separately.
+
+For explicit `MessageEntity` arrays, measure offsets and lengths in UTF-16 code units (Python: `len(text.encode("utf-16-le")) // 2`), not code points. Prefer HTML when manual offsets are unnecessary. Never put `<tg-emoji>` markup into an ordinary keyboard's plain `text` field.
+
+Do not assume the bot owner's Premium subscription enables channel posts or inline-mode results: check the destination and eligibility rules in the [official Bot API](https://core.telegram.org/bots/api#formatting-options). A delivery canary is separate from metadata enrichment. If custom emoji cannot be used, deliberately omit the keyboard icon and keep its label, or render the stored Unicode fallback in text.
+
+Other surfaces have separate contracts: [forum-topic icons](https://core.telegram.org/bots/api#createforumtopic) require IDs from `getForumTopicIconStickers`; [custom reactions](https://core.telegram.org/bots/api#setmessagereaction) depend on message/chat permissions. A Mini App is web UI: an ID is not an image URL or a browser-renderable `<tg-emoji>`. Ordinary stickers require sticker file identifiers, not custom emoji IDs.

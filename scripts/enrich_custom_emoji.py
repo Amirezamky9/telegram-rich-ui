@@ -1,51 +1,48 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse, json, os, urllib.request
+import argparse, json, os
 from pathlib import Path
+from emoji_registry import apply_sticker, call, eligible, index_records, mark_missing, recount
 
-ROOT=Path(__file__).resolve().parents[1]
-CAT=ROOT/"assets/emoji-catalog/catalog.json"
+ROOT = Path(__file__).resolve().parents[1]
+CAT = ROOT/'assets/emoji-catalog/catalog.json'
 
-def call(token, method, payload):
-    req=urllib.request.Request(
-        f"https://api.telegram.org/bot{token}/{method}",
-        data=json.dumps(payload).encode(),
-        headers={"Content-Type":"application/json"},
-        method="POST")
-    with urllib.request.urlopen(req,timeout=30) as r: body=json.load(r)
-    if not body.get("ok"): raise RuntimeError(body)
-    return body["result"]
+def chunks(items, size):
+    for start in range(0, len(items), size): yield items[start:start+size]
 
-def chunks(xs,n):
-    for i in range(0,len(xs),n): yield xs[i:i+n]
+def enrich(data, token, all_records=False, caller=call):
+    by = index_records(data['records'])
+    targets = [cid for cid, r in by.items() if all_records or not eligible(r)]
+    updated = missing = 0
+    for batch in chunks(targets, 200):
+        result = caller(token, 'getCustomEmojiStickers', {'custom_emoji_ids': batch})
+        if not isinstance(result, list): raise ValueError('Unexpected Telegram response')
+        seen = set()
+        for sticker in result:
+            cid = sticker.get('custom_emoji_id')
+            if cid not in batch or cid in seen:
+                raise ValueError('Unexpected or duplicate Telegram response ID')
+            seen.add(cid)
+            apply_sticker(by[cid], sticker, 'getCustomEmojiStickers')
+            updated += 1
+        for cid in set(batch)-seen:
+            mark_missing(by[cid]); missing += 1
+    recount(data)
+    return {'queried': len(targets), 'updated': updated, 'not_returned': missing}
 
 def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument("--all", action="store_true", help="Re-query ready IDs too")
-    ap.add_argument("--write", action="store_true", help="Write catalog.json; otherwise print summary")
-    args=ap.parse_args()
-    token=os.environ.get("BOT_TOKEN")
-    if not token: raise SystemExit("BOT_TOKEN is required")
-    data=json.loads(CAT.read_text(encoding="utf-8"))
-    records=data["records"]
-    targets=[r["custom_emoji_id"] for r in records if args.all or not r.get("selectable")]
-    by={r["custom_emoji_id"]:r for r in records}
-    updated=0
-    for batch in chunks(targets,200):
-        for st in call(token,"getCustomEmojiStickers",{"custom_emoji_ids":batch}):
-            cid=st.get("custom_emoji_id")
-            if not cid or cid not in by: continue
-            r=by[cid]
-            if st.get("emoji"): r["fallback"]=st["emoji"]
-            if st.get("set_name") and st["set_name"] not in r["packs"]: r["packs"].append(st["set_name"])
-            r["needs_repainting"]=bool(st.get("needs_repainting",False))
-            if r.get("fallback"):
-                r["status"]="ready"; r["selectable"]=True
-            updated+=1
-    data["selectable_count"]=sum(bool(r.get("selectable")) for r in records)
-    data["needs_enrichment_count"]=len(records)-data["selectable_count"]
-    if args.write:
-        CAT.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-    print(f"queried={len(targets)} updated={updated} selectable={data['selectable_count']} write={args.write}")
-
-if __name__=="__main__": main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--all', action='store_true', help='Re-query source-mapped/ready IDs too')
+    ap.add_argument('--write', action='store_true', help='Write catalog.json; default is dry run')
+    args = ap.parse_args()
+    token = os.environ.get('BOT_TOKEN')
+    if not token: ap.error('BOT_TOKEN is required')
+    try:
+        data = json.loads(CAT.read_text(encoding='utf-8'))
+        report = enrich(data, token, args.all)
+        if args.write:
+            CAT.write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    except (ValueError, RuntimeError) as exc:
+        ap.exit(1, str(exc)+'\n')
+    print(json.dumps({**report, 'selectable': data['selectable_count'], 'write': args.write}))
+if __name__ == '__main__': main()

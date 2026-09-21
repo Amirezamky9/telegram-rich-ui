@@ -21,7 +21,9 @@
       "file": "references/emoji-catalog.md",
       "file_sha": "348ed01f497bab811c7f835c25b88aefa181fb78",
       "license_note": "Repository README advertises MIT; source descriptions are not copied into this registry.",
-      "usage": "Semantic keys, IDs, fallback emoji and pack references"
+      "usage": "Semantic keys, IDs, fallback emoji and pack references",
+      "snapshot_url": "https://api.github.com/repos/Zulut30/premium-telegram-emoji/git/blobs/348ed01f497bab811c7f835c25b88aefa181fb78",
+      "audit_note": "ID/fallback observations rechecked against this exact blob on 2026-09-21; not live Telegram or visual verification."
     },
     {
       "id": "uuigww-telegram_emoji_for_llm",
@@ -30,7 +32,9 @@
       "file": "data/restricted-emoji-map.json",
       "file_sha": "4e7043daf55a123fd37c5162e294d6ed01c92b74",
       "license": "MIT",
-      "usage": "Broad Unicode fallback -> custom emoji ID mapping"
+      "usage": "Broad Unicode fallback -> custom emoji ID mapping",
+      "snapshot_url": "https://api.github.com/repos/uuigww/telegram_emoji_for_llm/git/blobs/4e7043daf55a123fd37c5162e294d6ed01c92b74",
+      "audit_note": "ID/fallback observations rechecked against this exact blob on 2026-09-21; not live Telegram or visual verification."
     },
     {
       "id": "telegram-customemojipack-iranNewz",

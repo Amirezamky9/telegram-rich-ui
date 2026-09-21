@@ -48,7 +48,7 @@ Read:
 - `assets/emoji-catalog/catalog.json` for broad search.
 - `assets/emoji-catalog/regional-packs.json` for Persian/Iranian pack inventory.
 
-The registry is deduplicated by `custom_emoji_id`.
+The registry is deduplicated by `custom_emoji_id`. Read `references/curated-emoji-guide.md` for the 47 annotated UI choices and `references/emoji-registry-audit.md` for verification limits.
 
 A ready record contains at least:
 
@@ -70,8 +70,8 @@ python3 scripts/search_emoji.py iran --tag persian_ui
 python3 scripts/search_emoji.py ai --format html
 ```
 
-Agents should prefer `curated-ui.json` when it contains a semantic match, because its sets are
-intended to remain visually coherent.
+Agents should prefer `curated-ui.json` when it contains a semantic match, because its entries have reviewed semantic guidance. Check each set’s `style_policy`: some mix
+source families, and none has a visual-review guarantee.
 
 ## Using emoji in rich text
 
@@ -114,7 +114,7 @@ Keep the same eligibility rules as custom emoji in messages.
 
 The registry includes two layers:
 
-1. ready cultural entries with verified fallbacks, including the Iran flag and useful Nowruz/Yalda
+1. ready cultural entries with source-mapped fallbacks, including the Iran flag and useful Nowruz/Yalda
    visual vocabulary;
 2. raw IDs from the public `iranNewz` custom-emoji pack plus discovered packs such as
    `Emojiran` and `Iranianflaghistory`.
@@ -129,13 +129,13 @@ Regular `t.me/addstickers/...` sticker packs are not mixed into this custom-emoj
 Import a known custom emoji pack:
 
 ```bash
-BOT_TOKEN=... python3 scripts/import_emoji_pack.py iranNewz
+BOT_TOKEN=... python3 scripts/import_emoji_pack.py iranNewz --write
 ```
 
 Enrich raw IDs already stored in the catalog:
 
 ```bash
-BOT_TOKEN=... python3 scripts/enrich_custom_emoji.py
+BOT_TOKEN=... python3 scripts/enrich_custom_emoji.py --write
 ```
 
 Both scripts use official Bot API metadata and merge by ID, so they do not create duplicates.
