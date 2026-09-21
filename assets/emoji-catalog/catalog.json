@@ -212,10 +212,22 @@
       ],
       "keywords": [
         "github",
-        "🐙"
+        "🐙",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -2838,10 +2850,24 @@
       ],
       "keywords": [
         "checkmark",
-        "✅"
+        "✅",
+        "status",
+        "success",
+        "warning",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "status"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -3093,10 +3119,24 @@
       ],
       "keywords": [
         "cross",
-        "❌"
+        "❌",
+        "status",
+        "success",
+        "warning",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "status"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -4115,10 +4155,23 @@
       ],
       "keywords": [
         "urgent",
-        "⚡"
+        "⚡",
+        "news",
+        "metrics",
+        "analytics",
+        "chart",
+        "market",
+        "stats",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -5459,10 +5512,22 @@
       ],
       "keywords": [
         "stats",
-        "📊"
+        "📊",
+        "news",
+        "metrics",
+        "analytics",
+        "chart",
+        "market",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -7301,10 +7366,22 @@
       ],
       "keywords": [
         "python",
-        "💻"
+        "💻",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -8561,12 +8638,16 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "iran flag",
+        "پرچم ایران"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -10114,10 +10195,22 @@
       ],
       "keywords": [
         "docker",
-        "👩‍💻"
+        "👩‍💻",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -10166,10 +10259,22 @@
       ],
       "keywords": [
         "terminal",
-        "👩‍💻"
+        "👩‍💻",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -10230,12 +10335,17 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "yalda",
+        "watermelon",
+        "هندوانه"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -12716,12 +12826,18 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "tea",
+        "coffee",
+        "چای",
+        "قهوه"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -18642,12 +18758,17 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "nowruz",
+        "spring",
+        "بهار"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -21307,12 +21428,17 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "nowruz",
+        "spring",
+        "بهار"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -21367,10 +21493,29 @@
       ],
       "keywords": [
         "discount",
-        "🏷"
+        "🏷",
+        "payment",
+        "pay",
+        "checkout",
+        "wallet",
+        "card",
+        "shop",
+        "store",
+        "commerce",
+        "shopping",
+        "price",
+        "پرداخت",
+        "کیف پول",
+        "کارت",
+        "فروشگاه",
+        "خرید",
+        "قیمت",
+        "تخفیف"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "commerce"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -21719,10 +21864,30 @@
       ],
       "keywords": [
         "dollar",
-        "💵"
+        "💵",
+        "payment",
+        "pay",
+        "checkout",
+        "wallet",
+        "card",
+        "shop",
+        "store",
+        "commerce",
+        "shopping",
+        "price",
+        "discount",
+        "پرداخت",
+        "کیف پول",
+        "کارت",
+        "فروشگاه",
+        "خرید",
+        "قیمت",
+        "تخفیف"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "commerce"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -24318,10 +24483,23 @@
       ],
       "keywords": [
         "announcement",
-        "📢"
+        "📢",
+        "news",
+        "metrics",
+        "analytics",
+        "chart",
+        "market",
+        "stats",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -24472,12 +24650,26 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "status",
+        "success",
+        "warning",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان"
       ],
       "tags": [
         "catalogued",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "status"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -26155,7 +26347,9 @@
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -26823,7 +27017,9 @@
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -27056,10 +27252,30 @@
       ],
       "keywords": [
         "star",
-        "⭐"
+        "⭐",
+        "payment",
+        "pay",
+        "checkout",
+        "wallet",
+        "card",
+        "shop",
+        "store",
+        "commerce",
+        "shopping",
+        "price",
+        "discount",
+        "پرداخت",
+        "کیف پول",
+        "کارت",
+        "فروشگاه",
+        "خرید",
+        "قیمت",
+        "تخفیف"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "commerce"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -27118,12 +27334,17 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "nowruz",
+        "spring",
+        "بهار"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -28044,10 +28265,22 @@
       "keywords": [
         "chart",
         "down",
-        "📉"
+        "📉",
+        "news",
+        "metrics",
+        "analytics",
+        "market",
+        "stats",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -28217,10 +28450,23 @@
       "keywords": [
         "warning",
         "yellow",
-        "⚠️"
+        "⚠️",
+        "status",
+        "success",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "status"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -28558,7 +28804,9 @@
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -28674,10 +28922,22 @@
       "keywords": [
         "chart",
         "up",
-        "📈"
+        "📈",
+        "news",
+        "metrics",
+        "analytics",
+        "market",
+        "stats",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -29035,12 +29295,17 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "nowruz",
+        "spring",
+        "بهار"
       ],
       "tags": [
         "broad_unicode",
         "iran_culture_palette",
-        "persian_ui"
+        "persian_ui",
+        "curated_ui",
+        "iran_culture"
       ],
       "sources": [
         "uuigww-telegram_emoji_for_llm"
@@ -29934,10 +30199,23 @@
       ],
       "keywords": [
         "breaking",
-        "🚨"
+        "🚨",
+        "news",
+        "metrics",
+        "analytics",
+        "chart",
+        "market",
+        "stats",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -30082,10 +30360,36 @@
       ],
       "keywords": [
         "bell",
-        "🔔"
+        "🔔",
+        "status",
+        "success",
+        "warning",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان",
+        "news",
+        "metrics",
+        "analytics",
+        "chart",
+        "market",
+        "stats",
+        "خبر",
+        "آمار",
+        "تحلیل",
+        "نمودار",
+        "بازار"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "status",
+        "news_metrics"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -34970,10 +35274,29 @@
       ],
       "keywords": [
         "wallet",
-        "👛"
+        "👛",
+        "payment",
+        "pay",
+        "checkout",
+        "card",
+        "shop",
+        "store",
+        "commerce",
+        "shopping",
+        "price",
+        "discount",
+        "پرداخت",
+        "کیف پول",
+        "کارت",
+        "فروشگاه",
+        "خرید",
+        "قیمت",
+        "تخفیف"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "commerce"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -35273,10 +35596,35 @@
       "keywords": [
         "verified",
         "✅",
-        "verefikatsiya"
+        "verefikatsiya",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی",
+        "status",
+        "success",
+        "warning",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation",
+        "status"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -37882,10 +38230,22 @@
       ],
       "keywords": [
         "search",
-        "🔍"
+        "🔍",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38050,10 +38410,22 @@
       ],
       "keywords": [
         "back",
-        "↩️"
+        "↩️",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38193,10 +38565,21 @@
       "keywords": [
         "settings",
         "bw",
-        "⚙️"
+        "⚙️",
+        "navigation",
+        "menu",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38221,10 +38604,22 @@
       ],
       "keywords": [
         "copy",
-        "📋"
+        "📋",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38308,10 +38703,22 @@
       ],
       "keywords": [
         "updates",
-        "🔄"
+        "🔄",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38365,10 +38772,22 @@
       "keywords": [
         "link",
         "bw",
-        "🔗"
+        "🔗",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38393,10 +38812,22 @@
       ],
       "keywords": [
         "forward",
-        "↗️"
+        "↗️",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38562,10 +38993,22 @@
       ],
       "keywords": [
         "profile",
-        "👤"
+        "👤",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38591,10 +39034,24 @@
       "keywords": [
         "info",
         "bw",
-        "ℹ️"
+        "ℹ️",
+        "status",
+        "success",
+        "warning",
+        "error",
+        "alert",
+        "notify",
+        "verification",
+        "وضعیت",
+        "موفق",
+        "هشدار",
+        "خطا",
+        "اعلان"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "status"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38677,10 +39134,22 @@
       ],
       "keywords": [
         "trash",
-        "🗑"
+        "🗑",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "support",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -38789,10 +39258,21 @@
       ],
       "keywords": [
         "support",
-        "💬"
+        "💬",
+        "navigation",
+        "menu",
+        "settings",
+        "account",
+        "nav",
+        "منو",
+        "تنظیمات",
+        "حساب",
+        "پشتیبانی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "navigation"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -39260,10 +39740,29 @@
       ],
       "keywords": [
         "card",
-        "💳"
+        "💳",
+        "payment",
+        "pay",
+        "checkout",
+        "wallet",
+        "shop",
+        "store",
+        "commerce",
+        "shopping",
+        "price",
+        "discount",
+        "پرداخت",
+        "کیف پول",
+        "کارت",
+        "فروشگاه",
+        "خرید",
+        "قیمت",
+        "تخفیف"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "commerce"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -39315,10 +39814,21 @@
       "keywords": [
         "bot",
         "ai",
-        "🤖"
+        "🤖",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -39534,10 +40044,22 @@
       ],
       "keywords": [
         "gemini",
-        "♊"
+        "♊",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -39743,10 +40265,22 @@
       ],
       "keywords": [
         "claude",
-        "🌥"
+        "🌥",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -39769,10 +40303,22 @@
       ],
       "keywords": [
         "chatgpt",
-        "💬"
+        "💬",
+        "ai",
+        "artificial intelligence",
+        "assistant",
+        "agent",
+        "developer",
+        "code",
+        "هوش مصنوعی",
+        "دستیار",
+        "ایجنت",
+        "برنامه نویسی"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "ai_tech"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
@@ -39827,7 +40373,10 @@
         "ایران",
         "فارسی",
         "نوروز",
-        "یلدا"
+        "یلدا",
+        "nowruz",
+        "spring",
+        "بهار"
       ],
       "tags": [
         "catalogued",
@@ -42924,10 +43473,30 @@
       ],
       "keywords": [
         "magazin",
-        "🏪"
+        "🏪",
+        "payment",
+        "pay",
+        "checkout",
+        "wallet",
+        "card",
+        "shop",
+        "store",
+        "commerce",
+        "shopping",
+        "price",
+        "discount",
+        "پرداخت",
+        "کیف پول",
+        "کارت",
+        "فروشگاه",
+        "خرید",
+        "قیمت",
+        "تخفیف"
       ],
       "tags": [
-        "catalogued"
+        "catalogued",
+        "curated_ui",
+        "commerce"
       ],
       "sources": [
         "zulut30-premium-telegram-emoji"
