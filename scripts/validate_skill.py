@@ -111,6 +111,21 @@ def check_regressions(errors: list[str]) -> None:
             fail(errors, f"unsupported no-429 guarantee in {path.relative_to(ROOT)}")
 
 
+def check_edit_in_place_contract(errors: list[str]) -> None:
+    required = {
+        "SKILL.md": ("editMessageMedia", "editMessageCaption", "editMessageReplyMarkup", "delete-and-resend"),
+        "references/slideshow-and-media.md": ("Editing existing messages in place", "editMessageMedia", "editMessageCaption", "editMessageReplyMarkup"),
+        "references/aiogram-python-recipes.md": ("edit_message_media", "edit_message_caption", "edit_message_reply_markup"),
+        "references/grammy-cloudflare-recipes.md": ("editMessageMedia", "editMessageCaption", "editMessageReplyMarkup"),
+        "references/ui-design-patterns.md": ("Edit in place", "editMessageMedia", "Delete-and-resend"),
+    }
+    for rel, needles in required.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for needle in needles:
+            if needle not in text:
+                fail(errors, f"edit-in-place contract missing {needle!r} in {rel}")
+
+
 def check_python(errors: list[str]) -> None:
     paths = list((ROOT / "scripts").glob("*.py"))
     starter = ROOT / "assets/aiogram-starter/main.py"
@@ -198,6 +213,7 @@ def main() -> int:
         check_local_references(errors)
         check_tocs(errors)
         check_regressions(errors)
+        check_edit_in_place_contract(errors)
         check_python(errors)
         check_json(errors)
         check_fixtures(errors)
@@ -214,6 +230,7 @@ def main() -> int:
     print("- local references resolved")
     print("- long references have TOCs")
     print("- regression guards passed")
+    print("- edit-in-place media contract passed")
     print("- Python syntax passed")
     print("- JSON fixtures parsed")
     print("- rich-message fixture semantics passed")
