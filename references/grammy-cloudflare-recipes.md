@@ -9,6 +9,7 @@
 - [Webhook security](#webhook-security)
 - [Send rich UI](#send-rich-ui)
 - [Edit rich UI](#edit-rich-ui)
+- [Edit media in place](#edit-media-in-place)
 - [Draft streaming](#draft-streaming)
 - [Stop generation](#stop-generation)
 - [Building polished UI](#building-polished-ui)
@@ -128,6 +129,26 @@ await ctx.api.editMessageText(chatId, messageId, {
 Inside a context for the message being edited, the corresponding context helper accepts the same string-or-rich-message content model. Let TypeScript/IDE autocomplete confirm optional arguments when upgrading grammY.
 
 Never call an invented Telegram endpoint named `editRichMessageText`.
+
+## Edit media in place
+
+Use grammY's typed media builder and `editMessageMedia` for message-as-screen UIs instead of delete-and-resend:
+
+```ts
+import { InputMediaBuilder } from "grammy";
+
+const media = InputMediaBuilder.photo(newPhotoFileId, {
+  caption: "Updated product card",
+});
+
+await ctx.api.editMessageMedia(chatId, messageId, media, {
+  reply_markup: updatedKeyboard,
+});
+```
+
+The same Bot API method can replace a text or rich message with media. If only the caption changes, use `editMessageCaption`; if only the keyboard changes, use `editMessageReplyMarkup`.
+
+When editing an inline message, do not upload a new file; use a Telegram `file_id` or URL. Preserve album-type constraints and the documented business-message edit window. Treat delete-and-resend as an explicit fallback for unsupported transitions or non-editable messages.
 
 ## Draft streaming
 
