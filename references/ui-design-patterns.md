@@ -8,6 +8,7 @@
 - [Buttons and actions](#buttons-and-actions)
 - [Tables and dense data](#tables-and-dense-data)
 - [Media-first cards](#media-first-cards)
+- [Edit in place](#edit-in-place)
 - [Details and progressive disclosure](#details-and-progressive-disclosure)
 - [Persian and RTL](#persian-and-rtl)
 - [Loading and AI generation](#loading-and-ai-generation)
@@ -93,6 +94,25 @@ heading
 ```
 
 Use slideshow when viewing items sequentially makes sense; use collage when simultaneous overview matters. Keep captions meaningful without depending on a particular client animation.
+
+## Edit in place
+
+Treat a bot message used as a card/menu/screen as a stable UI surface. Store its `message_id` and update that surface in place whenever Telegram exposes a supported edit method.
+
+Recommended routing:
+
+```text
+text/rich content change -> editMessageText
+media or hero image change -> editMessageMedia
+caption-only change -> editMessageCaption
+inline-keyboard-only change -> editMessageReplyMarkup
+```
+
+This keeps navigation visually stable, avoids chat clutter/flicker, and prevents callbacks from being unnecessarily rebound to a new message.
+
+Delete-and-resend is appropriate only when the target message is no longer editable, Telegram does not document the required type transition, or product semantics intentionally require a new history item. If replacement is necessary, update stored message identifiers and callback/session state as one logical transaction.
+
+Do not infer unsupported reverse conversions. In particular, the current Bot API explicitly documents text/rich-to-media through `editMessageMedia`; it does not document a general conventional-media-to-text-only conversion through `editMessageText`.
 
 ## Details and progressive disclosure
 
@@ -192,6 +212,7 @@ This makes escaping, tests, and design consistency easier and avoids trying to r
 Before shipping a polished card:
 
 - primary information is visible without expansion;
+- existing screen/card messages are edited in place when the desired transition is supported;
 - one action is clearly dominant;
 - button count is reasonable and each row remains within Telegram's 1-8 limit;
 - table is narrow enough for mobile use;
