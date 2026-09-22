@@ -25,6 +25,14 @@ Use this skill as a control plane. Load only the reference files needed for the 
 
 - Use `sendRichMessage` to persist a rich message.
 - Edit a persistent rich message with `editMessageText` and its `rich_message` parameter. There is no Telegram method named `editRichMessageText`.
+- Prefer editing an existing bot UI message in place over delete-and-resend whenever Telegram documents a supported edit path. Preserve the existing `message_id` and chat position.
+- Use `editMessageMedia` to replace animation, audio, document, live photo, photo, or video content, and to replace a text or rich message with media. Do not delete and resend a photo/video card merely because its visual changes.
+- Use `editMessageCaption` when only the caption changes, and `editMessageReplyMarkup` when only the inline keyboard changes.
+- `editMessageMedia` can carry the new caption inside the `InputMedia` object and a new inline keyboard through `reply_markup`; prefer one in-place transition when both belong to the same UI update.
+- Respect album constraints: audio albums can only be edited to audio, document albums only to document, and other media albums only to photo, live photo, or video.
+- When editing an inline message, `editMessageMedia` cannot upload a new file; reuse a Telegram `file_id` or specify a URL. Business messages not sent by the bot and without an inline keyboard have the documented 48-hour edit limit.
+- Do not assume a conventional media message can always be converted to text-only or rich-only content. If the desired transition has no documented edit path or the message is no longer editable, use an explicit replacement fallback and rebind stored message state.
+- For ephemeral UI, use the matching `editEphemeralMessageText`, `editEphemeralMessageMedia`, `editEphemeralMessageCaption`, or `editEphemeralMessageReplyMarkup` method rather than recreating the ephemeral surface.
 - `InputRichMessage` must contain exactly one of `html`, `markdown`, or `blocks`.
 - Use `media` to bind media referenced from rich HTML or Markdown through Telegram `tg://...` identifiers.
 - Rich messages are limited to 32,768 UTF-8 characters, 500 blocks, 16 nesting levels, 50 media attachments, and 20 table columns.
@@ -57,7 +65,7 @@ Do not assume old clients will transform every rich construct in a specific way.
 | Core methods, limits, HTML/Markdown/blocks, edit semantics | `references/rich-formatting-overview.md` |
 | Tables, cells, colspan/rowspan, JSON table schema | `references/tables-and-grids.md` |
 | Rich buttons, actions, styles, restrictions | `references/rich-buttons-and-colors.md` |
-| Slideshow, collage, embedded media, media identifiers | `references/slideshow-and-media.md` |
+| Slideshow, collage, embedded media, media identifiers, edit-in-place media rules | `references/slideshow-and-media.md` |
 | Custom emoji rules and AIActions | `references/custom-emojis-and-stickers.md` |
 | Premium emoji registry, semantic search, button icons, curated UI sets, Persian/Iranian packs | `references/premium-emoji-registry.md` |
 | Draft lifecycle, stop handling, finalization | `references/thinking-drafts-and-streaming.md` |
@@ -113,6 +121,7 @@ Before returning production code or committing changes:
 
 - Confirm the source snapshot in `references/SOURCES.md` is still current.
 - Confirm no invented Bot API methods or schema fields are present.
+- Confirm existing media/card messages use an in-place edit when Telegram supports it; delete-and-resend must have a documented reason.
 - Confirm exactly one rich content source is used.
 - Confirm table width and button-row limits.
 - Confirm private-chat restrictions for drafts and `web_app` buttons.
