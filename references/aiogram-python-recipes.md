@@ -7,6 +7,7 @@
 - [Send rich HTML](#send-rich-html)
 - [Send a typed JSON block tree](#send-a-typed-json-block-tree)
 - [Edit rich content](#edit-rich-content)
+- [Edit media in place](#edit-media-in-place)
 - [Stream a rich draft](#stream-a-rich-draft)
 - [Handle stop generation](#handle-stop-generation)
 - [Ephemeral rich message](#ephemeral-rich-message)
@@ -111,6 +112,44 @@ await bot.edit_message_text(
 ```
 
 Do not create or call `editRichMessageText` as though it were a Telegram endpoint.
+
+## Edit media in place
+
+For a photo/video/card UI screen, keep the original message and edit it instead of deleting and resending it.
+
+```python
+from aiogram.types import InputMediaPhoto
+
+await bot.edit_message_media(
+    chat_id=chat_id,
+    message_id=message_id,
+    media=InputMediaPhoto(
+        media=new_photo_file_id,
+        caption="Updated product card",
+    ),
+    reply_markup=updated_keyboard,
+)
+```
+
+aiogram also exposes `Message.edit_media(...)` as a context-aware shortcut. The same Bot API method can replace a text or rich message with media.
+
+Route narrower edits to narrower methods:
+
+```python
+await bot.edit_message_caption(
+    chat_id=chat_id,
+    message_id=message_id,
+    caption="Updated caption only",
+)
+
+await bot.edit_message_reply_markup(
+    chat_id=chat_id,
+    message_id=message_id,
+    reply_markup=updated_keyboard,
+)
+```
+
+For inline messages, do not pass a newly uploaded file to `edit_message_media`; use a prior `file_id` or URL. Respect album-type restrictions and the documented business-message edit window. Fall back to delete/send only when the requested transition is not supported or the target is no longer editable.
 
 ## Stream a rich draft
 
