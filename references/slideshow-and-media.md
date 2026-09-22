@@ -6,6 +6,7 @@
 - [HTML and Markdown media blocks](#html-and-markdown-media-blocks)
 - [Collage and slideshow](#collage-and-slideshow)
 - [InputRichMessageMedia](#inputrichmessagemedia)
+- [Editing existing messages in place](#editing-existing-messages-in-place)
 - [Telegram media identifiers](#telegram-media-identifiers)
 - [JSON media blocks](#json-media-blocks)
 - [Draft restrictions](#draft-restrictions)
@@ -87,6 +88,32 @@ Example conceptual payload:
 ```
 
 Use framework-native media classes for production code so the exact current type shape is checked by the framework.
+
+## Editing existing messages in place
+
+For card-like bot UI, retain the existing `message_id` and mutate the message whenever the Bot API exposes a matching edit method. Delete-and-resend is a fallback, not the normal navigation pattern.
+
+| Desired UI change | Preferred API |
+| --- | --- |
+| Replace photo/video/animation/audio/document/live photo content | `editMessageMedia` |
+| Replace a text or rich message with media | `editMessageMedia` |
+| Change only a media caption | `editMessageCaption` |
+| Change only an inline keyboard | `editMessageReplyMarkup` |
+| Edit ephemeral media/caption/keyboard/text | matching `editEphemeralMessage*` method |
+| Convert a conventional media message to text-only/rich-only | Do not assume support; use a deliberate replacement fallback if no documented edit path applies |
+
+`editMessageMedia` accepts a new `InputMedia` object and a new inline keyboard. Put the new caption in the `InputMedia` object when media and caption change together, so one API call can represent the UI transition.
+
+Operational rules:
+
+- Do not delete and resend a product card, gallery card, order card, or menu screen solely because its photo/video changes.
+- For ordinary non-inline messages, use Telegram-hosted `file_id` values when practical; framework-supported uploads remain available where the Bot API permits them.
+- For inline messages, a new file cannot be uploaded during `editMessageMedia`; use an existing `file_id` or URL.
+- For album members, preserve the documented category: audio albums stay audio, document albums stay document, and other media albums stay within photo/live-photo/video.
+- Certain business messages not sent by the bot and without an inline keyboard can only be edited within 48 hours.
+- If Telegram rejects the edit because the target is no longer editable or the requested type transition is unsupported, perform an explicit replacement flow and update any stored `message_id` atomically.
+
+History note: Bot API 7.11 (2024-10-31) explicitly added text-to-media replacement via `editMessageMedia`. Current Bot API 10.3 also documents rich-message-to-media replacement.
 
 ## Telegram media identifiers
 
