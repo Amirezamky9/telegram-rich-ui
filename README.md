@@ -22,6 +22,7 @@ See `references/SOURCES.md` for provenance and freshness rules.
 - tables, lists, quotations, details, math, anchors, localized time, RTL
 - inline rich buttons and button rows
 - collages, slideshows, embedded photo/video/audio/document media
+- edit-in-place media/card updates with `editMessageMedia`, `editMessageCaption`, and `editMessageReplyMarkup`
 - custom emoji and AIActions guidance
 - deduplicated Premium Emoji Registry with semantic/Persian search, curated UI palettes, CSV export, and Bot API pack import/enrichment
 - ephemeral messages
@@ -175,6 +176,12 @@ This repository separates three types of statement:
 3. **Project recommendation**: an operational choice, such as coalescing stream updates or generating explicit legacy fallbacks.
 
 Recommendations are never written as Telegram guarantees. Human-readable Bot API error descriptions are not treated as stable machine contracts.
+
+## Edit-in-place UI policy
+
+For message-as-screen bot interfaces, keep the existing `message_id` whenever Telegram exposes a supported edit path. Update photos/videos/documents/audio/animations/live photos with `editMessageMedia`, captions with `editMessageCaption`, and keyboards with `editMessageReplyMarkup`. Delete-and-resend is reserved for unsupported transitions or messages that are no longer editable.
+
+This avoids unnecessary chat clutter and visual flicker, and keeps callback/navigation state attached to the same screen message.
 
 ## Important corrections from the pre-1.2 layout
 
