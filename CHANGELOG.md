@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0 - 2026-09-22
+
+- Added an explicit edit-in-place-first policy for Telegram bot UI screens.
+- Added `editMessageMedia` guidance for media-to-media edits and text/rich-to-media transitions, including album, inline-message, and business-message restrictions.
+- Added `editMessageCaption` and `editMessageReplyMarkup` routing so caption- or keyboard-only changes do not trigger delete-and-resend.
+- Added aiogram 3.31+ and grammY 1.46+ media-edit recipes.
+- Added UI guidance that treats delete-and-resend as a fallback only when Telegram has no supported edit path or the message is no longer editable.
+
 ## 1.3.0 - 2026-09-21
 
 - Added a deduplicated Premium Custom Emoji Registry with **1,483 unique IDs**, JSON and CSV views.
