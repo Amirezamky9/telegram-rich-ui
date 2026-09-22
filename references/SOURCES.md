@@ -11,7 +11,7 @@
 
 ## Verified snapshot
 
-Last reviewed: **2026-09-21**.
+Last reviewed: **2026-09-22**.
 
 | Component | Reviewed version/state |
 | --- | --- |
@@ -41,11 +41,25 @@ For rich messages, verify the live sections for:
 - `sendRichMessageDraft`
 - `sendMessageDraft`
 - `editMessageText`
+- `editMessageMedia`
+- `editMessageCaption`
+- `editMessageReplyMarkup`
+- `editEphemeralMessageText`
+- `editEphemeralMessageMedia`
+- `editEphemeralMessageCaption`
+- `editEphemeralMessageReplyMarkup`
 - `EphemeralMessageParameters`
 - `MessageGenerationStopped`
 - rich-message formatting options
 
 Do not promote an observed client rendering detail to API contract unless Telegram documents it.
+
+### Message editing history relevant to UI
+
+- Telegram's current Bot API 10.3 contract documents `editMessageMedia` for editing animation, audio, document, live photo, photo, or video messages and for replacing a text or rich message with media.
+- The Bot API 7.11 changelog (2024-10-31) explicitly added the ability to add media to existing text messages through `editMessageMedia`; do not treat text-to-media editing as a new 10.3 feature.
+- The current contract keeps album-type restrictions, forbids new file upload when editing inline messages, and documents a 48-hour limit for certain business messages not sent by the bot.
+
 
 ## Framework sources
 
